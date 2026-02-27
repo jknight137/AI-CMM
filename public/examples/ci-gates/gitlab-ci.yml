@@ -1,0 +1,259 @@
+# Agent Gate Steps for GitLab CI
+#
+# This pipeline configuration runs additional checks on MRs that are
+# agent-generated or agent-assisted.
+# It supplements your standard CI pipeline -- it does not replace build, test, or lint stages.
+#
+# Prerequisites:
+# - gitleaks binary or Docker image available
+# - OPA (Open Policy Agent) for policy checks (optional, Level 4+)
+# - Dependency scanning (GitLab native, Snyk, or equivalent)
+#
+# Usage:
+# 1. Include this file in your .gitlab-ci.yml or add these jobs to your existing pipeline.
+# 2. Customize the steps to match your tooling.
+# 3. Adjust the agent detection logic to match your labeling convention.
+
+stages:
+  - detect
+  - scan
+  - agent-checks
+
+# ------------------------------------------------------------------
+# Variables
+# ------------------------------------------------------------------
+variables:
+  AGENT_LABELS: "agent-assisted,agent-generated,ai-assisted"
+  MAX_PR_SIZE: "500"
+
+# ------------------------------------------------------------------
+# Stage 1: Detect if this MR is agent-generated or agent-assisted
+# ------------------------------------------------------------------
+detect-agent:
+  stage: detect
+  image: alpine:latest
+  script:
+    - apk add --no-cache curl jq
+    - |
+      IS_AGENT="false"
+
+      # Check MR labels
+      MR_LABELS=$(echo "$CI_MERGE_REQUEST_LABELS" | tr ',' '\n')
+      for LABEL in $(echo "$AGENT_LABELS" | tr ',' ' '); do
+        if echo "$MR_LABELS" | grep -qi "$LABEL"; then
+          IS_AGENT="true"
+          break
+        fi
+      done
+
+      # Check MR description for Co-Authored-By from known agents
+      if echo "$CI_MERGE_REQUEST_DESCRIPTION" | grep -qi "Co-Authored-By:.*claude\|Co-Authored-By:.*copilot\|Co-Authored-By:.*codex"; then
+        IS_AGENT="true"
+      fi
+
+      echo "IS_AGENT_MR=$IS_AGENT" >> detect.env
+      echo "Agent MR detected: $IS_AGENT"
+  artifacts:
+    reports:
+      dotenv: detect.env
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ------------------------------------------------------------------
+# Stage 2: Secrets scanning (runs on ALL MRs)
+# ------------------------------------------------------------------
+secrets-scan:
+  stage: scan
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --verbose --log-opts="$CI_MERGE_REQUEST_DIFF_BASE_SHA..$CI_COMMIT_SHA"
+  allow_failure: false
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ------------------------------------------------------------------
+# Stage 2: Dependency scanning (runs on ALL MRs)
+# ------------------------------------------------------------------
+
+# Option A: GitLab native dependency scanning
+# Uncomment to use GitLab's built-in dependency scanning:
+# include:
+#   - template: Security/Dependency-Scanning.gitlab-ci.yml
+
+# Option B: Custom dependency audit
+dependency-audit:
+  stage: scan
+  image: node:20-slim  # Adjust for your language
+  script:
+    - |
+      # Check if dependency files changed
+      CHANGED_FILES=$(git diff --name-only "$CI_MERGE_REQUEST_DIFF_BASE_SHA"..."$CI_COMMIT_SHA")
+
+      if echo "$CHANGED_FILES" | grep -qE '(package\.json|package-lock\.json|requirements\.txt|go\.mod|Cargo\.toml|Gemfile\.lock|pom\.xml)'; then
+        echo "Dependency files changed -- running audit"
+        # For Node.js:
+        npm audit --audit-level=high
+        # For Python: pip-audit
+        # For Go: govulncheck ./...
+        # For Ruby: bundle-audit check
+      else
+        echo "No dependency file changes -- skipping audit"
+      fi
+  allow_failure: false
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ------------------------------------------------------------------
+# Stage 2: IaC policy check (runs on MRs that change Terraform files)
+# ------------------------------------------------------------------
+iac-policy-check:
+  stage: scan
+  image:
+    name: hashicorp/terraform:latest
+    entrypoint: [""]
+  script:
+    - |
+      CHANGED_FILES=$(git diff --name-only "$CI_MERGE_REQUEST_DIFF_BASE_SHA"..."$CI_COMMIT_SHA")
+
+      if echo "$CHANGED_FILES" | grep -q '\.tf$'; then
+        echo "Terraform files changed -- running validation"
+        terraform init -backend=false
+        terraform validate
+
+        # Run tfsec (install or use a separate job with tfsec image)
+        # wget -qO- https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64 > /usr/local/bin/tfsec
+        # chmod +x /usr/local/bin/tfsec
+        # tfsec . --no-color
+      else
+        echo "No Terraform changes -- skipping IaC checks"
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ------------------------------------------------------------------
+# Stage 3: Agent-specific additional checks (only for agent MRs)
+# ------------------------------------------------------------------
+agent-pr-size-check:
+  stage: agent-checks
+  image: alpine:latest
+  needs:
+    - job: detect-agent
+      artifacts: true
+  script:
+    - apk add --no-cache git
+    - |
+      if [ "$IS_AGENT_MR" != "true" ]; then
+        echo "Not an agent MR -- skipping size check"
+        exit 0
+      fi
+
+      # Count changed lines
+      STATS=$(git diff --shortstat "$CI_MERGE_REQUEST_DIFF_BASE_SHA"..."$CI_COMMIT_SHA")
+      ADDITIONS=$(echo "$STATS" | grep -oP '\d+ insertion' | grep -oP '\d+' || echo "0")
+      DELETIONS=$(echo "$STATS" | grep -oP '\d+ deletion' | grep -oP '\d+' || echo "0")
+      TOTAL=$((ADDITIONS + DELETIONS))
+
+      echo "Total changed lines: $TOTAL"
+
+      if [ "$TOTAL" -gt "$MAX_PR_SIZE" ]; then
+        echo "WARNING: Agent-generated MR has $TOTAL changed lines. Consider breaking this into smaller MRs."
+        # Uncomment to make this a hard gate:
+        # exit 1
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+agent-risk-check:
+  stage: agent-checks
+  image: alpine:latest
+  needs:
+    - job: detect-agent
+      artifacts: true
+  script:
+    - apk add --no-cache git
+    - |
+      if [ "$IS_AGENT_MR" != "true" ]; then
+        echo "Not an agent MR -- skipping risk check"
+        exit 0
+      fi
+
+      CHANGED_FILES=$(git diff --name-only "$CI_MERGE_REQUEST_DIFF_BASE_SHA"..."$CI_COMMIT_SHA")
+      HIGH_RISK="false"
+
+      # Check for IAM/RBAC policy changes
+      if echo "$CHANGED_FILES" | grep -qiE '(iam|policy|role|rbac).*\.tf$'; then
+        HIGH_RISK="true"
+        echo "HIGH RISK: IAM/RBAC policy changes detected"
+      fi
+
+      # Check for CI/CD changes
+      if echo "$CHANGED_FILES" | grep -qE '\.gitlab-ci\.yml|\.github/workflows/|Jenkinsfile'; then
+        HIGH_RISK="true"
+        echo "HIGH RISK: CI/CD pipeline changes detected"
+      fi
+
+      # Check for auth-related changes
+      if echo "$CHANGED_FILES" | grep -qiE '(auth|login|session|token|credential|permission)'; then
+        HIGH_RISK="true"
+        echo "HIGH RISK: Authentication/authorization file changes detected"
+      fi
+
+      # Check for network security changes
+      if echo "$CHANGED_FILES" | grep -qiE '(security.group|firewall|nacl|vpc|network).*\.tf$'; then
+        HIGH_RISK="true"
+        echo "HIGH RISK: Network security changes detected"
+      fi
+
+      # Check for database migration files
+      if echo "$CHANGED_FILES" | grep -qiE '(migration|schema|ddl)'; then
+        HIGH_RISK="true"
+        echo "HIGH RISK: Database migration changes detected"
+      fi
+
+      if [ "$HIGH_RISK" = "true" ]; then
+        echo ""
+        echo "============================================="
+        echo "This agent-generated MR contains high-risk changes."
+        echo "Please ensure the appropriate reviewers have been added."
+        echo "See the PR checklist for required reviewers per category."
+        echo "============================================="
+        # Uncomment to make this a hard gate:
+        # exit 1
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ------------------------------------------------------------------
+# Stage 3: Auto-label agent MRs
+# ------------------------------------------------------------------
+auto-label-agent:
+  stage: agent-checks
+  image: alpine:latest
+  needs:
+    - job: detect-agent
+      artifacts: true
+  script:
+    - apk add --no-cache curl
+    - |
+      if [ "$IS_AGENT_MR" != "true" ]; then
+        echo "Not an agent MR -- skipping auto-label"
+        exit 0
+      fi
+
+      # Check if label already exists
+      if echo "$CI_MERGE_REQUEST_LABELS" | grep -q "agent-assisted"; then
+        echo "Label already present"
+        exit 0
+      fi
+
+      # Add label via GitLab API
+      curl --silent --request PUT \
+        --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}" \
+        --data-urlencode "add_labels=agent-assisted"
+
+      echo "Added 'agent-assisted' label to MR"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"

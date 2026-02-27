@@ -1,0 +1,275 @@
+# Agent Gate Steps for GitHub Actions
+#
+# This workflow runs additional checks on PRs that are agent-generated or agent-assisted.
+# It supplements your standard CI pipeline -- it does not replace build, test, or lint steps.
+#
+# Prerequisites:
+# - gitleaks installed or available as a GitHub Action
+# - OPA (Open Policy Agent) for policy checks (optional, Level 4+)
+# - Dependency scanning tool (Dependabot, Snyk, Artifactory Xray, etc.)
+#
+# Usage:
+# 1. Copy this file to .github/workflows/agent-gates.yml in your repo.
+# 2. Customize the steps to match your tooling.
+# 3. Add the "agent-assisted" label detection logic to match your labeling convention.
+
+name: Agent Gates
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+# Cancel in-progress runs for the same PR
+concurrency:
+  group: agent-gates-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ------------------------------------------------------------------
+  # Step 1: Detect if this PR is agent-generated or agent-assisted
+  # ------------------------------------------------------------------
+  detect-agent:
+    runs-on: ubuntu-latest
+    outputs:
+      is_agent_pr: ${{ steps.check.outputs.is_agent }}
+    steps:
+      - name: Check for agent indicators
+        id: check
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          IS_AGENT="false"
+
+          # Check for agent-assisted label
+          LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | grep -qi "agent-assisted\|agent-generated\|ai-assisted"; then
+            IS_AGENT="true"
+          fi
+
+          # Check for Co-Authored-By trailer from known agents
+          # This checks the PR body; you can also check commit messages
+          if echo "$PR_BODY" | grep -qi "Co-Authored-By:.*claude\|Co-Authored-By:.*copilot\|Co-Authored-By:.*codex"; then
+            IS_AGENT="true"
+          fi
+
+          echo "is_agent=$IS_AGENT" >> "$GITHUB_OUTPUT"
+          echo "Agent PR detected: $IS_AGENT"
+
+  # ------------------------------------------------------------------
+  # Step 2: Secrets scanning (runs on ALL PRs)
+  # ------------------------------------------------------------------
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # If using a custom gitleaks config:
+        # with:
+        #   config-path: .gitleaks.toml
+
+  # ------------------------------------------------------------------
+  # Step 3: Dependency audit (runs on ALL PRs that change dependency files)
+  # ------------------------------------------------------------------
+  dependency-audit:
+    runs-on: ubuntu-latest
+    # Only run when dependency files change
+    if: |
+      contains(github.event.pull_request.changed_files, 'package.json') ||
+      contains(github.event.pull_request.changed_files, 'package-lock.json') ||
+      contains(github.event.pull_request.changed_files, 'requirements.txt') ||
+      contains(github.event.pull_request.changed_files, 'go.mod') ||
+      contains(github.event.pull_request.changed_files, 'Cargo.toml')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Option A: GitHub native dependency review
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          # Uncomment to use an allow-list:
+          # allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
+
+      # Option B: If using Snyk, replace the above with:
+      # - name: Snyk scan
+      #   uses: snyk/actions/node@master  # or /python, /golang, etc.
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # Option C: If using Artifactory Xray, replace with:
+      # - name: Xray scan
+      #   uses: jfrog/frogbot@v2
+      #   env:
+      #     JF_URL: ${{ secrets.ARTIFACTORY_URL }}
+      #     JF_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+
+  # ------------------------------------------------------------------
+  # Step 4: Policy check for IaC (runs on PRs that change Terraform files)
+  # ------------------------------------------------------------------
+  iac-policy-check:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.changed_files, '.tf')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init and validate
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          soft_fail: false
+
+      # Optional: OPA policy check (Level 4+)
+      # - name: Run OPA policy check
+      #   uses: open-policy-agent/opa-github-action@v2
+      #   with:
+      #     policy: policies/
+      #     input: terraform-plan.json
+
+  # ------------------------------------------------------------------
+  # Step 5: Agent-specific additional checks (only for agent PRs)
+  # ------------------------------------------------------------------
+  agent-additional-checks:
+    runs-on: ubuntu-latest
+    needs: detect-agent
+    if: needs.detect-agent.outputs.is_agent_pr == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        id: pr_size
+        run: |
+          # Get the number of changed lines
+          ADDITIONS=${{ github.event.pull_request.additions }}
+          DELETIONS=${{ github.event.pull_request.deletions }}
+          TOTAL=$((ADDITIONS + DELETIONS))
+
+          echo "Total changed lines: $TOTAL"
+
+          if [ "$TOTAL" -gt 500 ]; then
+            echo "::warning::Agent-generated PR has $TOTAL changed lines. Consider breaking this into smaller PRs."
+            echo "large_pr=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check for high-risk file changes
+        id: risk_check
+        run: |
+          # Get list of changed files
+          CHANGED_FILES=$(gh pr diff ${{ github.event.pull_request.number }} --name-only)
+
+          HIGH_RISK="false"
+          RISK_DETAILS=""
+
+          # Check for IAM/RBAC policy changes
+          if echo "$CHANGED_FILES" | grep -qiE '(iam|policy|role|rbac).*\.tf$'; then
+            HIGH_RISK="true"
+            RISK_DETAILS="$RISK_DETAILS- IAM/RBAC policy changes detected\n"
+          fi
+
+          # Check for CI/CD changes
+          if echo "$CHANGED_FILES" | grep -qE '\.github/workflows/|\.gitlab-ci|Jenkinsfile|\.azure-pipelines'; then
+            HIGH_RISK="true"
+            RISK_DETAILS="$RISK_DETAILS- CI/CD pipeline changes detected\n"
+          fi
+
+          # Check for auth-related changes
+          if echo "$CHANGED_FILES" | grep -qiE '(auth|login|session|token|credential|permission)'; then
+            HIGH_RISK="true"
+            RISK_DETAILS="$RISK_DETAILS- Authentication/authorization file changes detected\n"
+          fi
+
+          # Check for security group or network changes
+          if echo "$CHANGED_FILES" | grep -qiE '(security.group|firewall|nacl|vpc|network).*\.tf$'; then
+            HIGH_RISK="true"
+            RISK_DETAILS="$RISK_DETAILS- Network security changes detected\n"
+          fi
+
+          # Check for database migration files
+          if echo "$CHANGED_FILES" | grep -qiE '(migration|schema|ddl)'; then
+            HIGH_RISK="true"
+            RISK_DETAILS="$RISK_DETAILS- Database migration changes detected\n"
+          fi
+
+          echo "high_risk=$HIGH_RISK" >> "$GITHUB_OUTPUT"
+          echo "risk_details<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$RISK_DETAILS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post risk assessment comment
+        if: steps.risk_check.outputs.high_risk == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const riskDetails = `${{ steps.risk_check.outputs.risk_details }}`;
+            const body = `## Agent PR Risk Assessment
+
+            This agent-assisted PR contains changes in **high-risk categories**:
+
+            ${riskDetails}
+
+            **Action required**: Please ensure the appropriate reviewers from the high-risk change table have been added to this PR before merging.
+
+            See the [PR checklist](../templates/pr-checklist.md) for required reviewers per category.`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Require additional approval for high-risk agent PRs
+        if: steps.risk_check.outputs.high_risk == 'true'
+        run: |
+          echo "::error::This agent-generated PR touches high-risk files and requires additional review. See the PR comment for details."
+          # Uncomment the next line to make this a hard gate:
+          # exit 1
+
+  # ------------------------------------------------------------------
+  # Step 6: Auto-label agent PRs (if not already labeled)
+  # ------------------------------------------------------------------
+  auto-label:
+    runs-on: ubuntu-latest
+    needs: detect-agent
+    if: needs.detect-agent.outputs.is_agent_pr == 'true'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Add agent-assisted label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (!labels.includes('agent-assisted')) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['agent-assisted']
+              });
+            }
