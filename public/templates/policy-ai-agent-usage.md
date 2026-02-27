@@ -9,7 +9,7 @@
 
 ## 1. Purpose
 
-This policy defines the acceptable use of AI coding agents within your organization. It establishes rules for which tools may be used, how data is handled, what approvals are required, and how exceptions are managed. The policy applies to all employees, contractors, and vendors who write, review, or deploy code on behalf of the organization.
+This policy defines the acceptable use of AI coding agents within [ORG_NAME]. It establishes rules for which tools may be used, how data is handled, what approvals are required, and how exceptions are managed. The policy applies to all employees, contractors, and vendors who write, review, or deploy code on behalf of the organization.
 
 ---
 
@@ -35,8 +35,8 @@ Only AI agent tools on the approved list may be used for work on organizational 
 
 | Tool | Approved Version(s) | Approved Endpoint | Notes |
 |------|---------------------|-------------------|-------|
-| [Tool 1, e.g., Claude Code] | [Version] | [Org proxy, cloud model API, or direct vendor API] | Primary agent tool |
-| [Tool 2, e.g., GitHub Copilot] | [Version] | [Org-managed license endpoint] | IDE completion |
+| [Tool 1, e.g., Claude Code] | [Version] | AWS Bedrock (org proxy) | Primary agent tool |
+| [Tool 2, e.g., GitHub Copilot] | [Version] | GitHub Copilot Service (org-managed license) | IDE completion |
 | [Add more as approved] | | | |
 
 **Unapproved tools**: Any AI coding tool not on the approved list is prohibited for use on organizational code. This includes:
@@ -59,7 +59,7 @@ Only AI agent tools on the approved list may be used for work on organizational 
 | Internal | Yes | Logged via org API proxy |
 | Confidential | Only with DLP controls active (Level 4+). Before DLP: No. | DLP scan before transmission. Prompt/response logged and reviewed. |
 | Restricted (PII, PHI, secrets) | No | Never send to any AI agent endpoint. Technical controls must prevent this. |
-| Classified / regulated data | No | Never send to any AI agent endpoint. Network boundaries enforced per applicable regulation. |
+| Classified / CUI (Federal) | No | Never send to any AI agent endpoint. Federal network boundaries enforced. |
 
 ### 4.2 Specific Prohibitions
 
@@ -67,18 +67,18 @@ The following must **never** be included in prompts, code context, or files acce
 - API keys, tokens, passwords, or other credentials
 - Personally identifiable information (PII): names, emails, SSNs, addresses linked to real individuals
 - Protected health information (PHI)
-- Controlled or classified data as defined by your applicable regulatory framework
+- Controlled Unclassified Information (CUI) as defined by NIST SP 800-171
 - Customer data from production databases
 - Encryption keys or key material
 - Security vulnerability details not yet disclosed or patched
 
-### 4.3 Regulated Environment Data Handling
+### 4.3 Federal Environment Data Handling
 
-For teams working in regulated environments (e.g., FedRAMP, HIPAA, PCI-DSS, GDPR):
-- All AI agent API traffic must route through approved endpoints only. Consult your compliance team for the list of approved services and regions.
-- No organizational data from regulated systems may be sent to unapproved AI endpoints.
-- Data residency requirements apply: AI model inference must occur within approved regions or boundaries.
-- Logging of agent interactions must comply with applicable audit and accountability controls (e.g., NIST 800-53 AU controls, HIPAA audit requirements, GDPR record-keeping).
+For teams working in Federal environments:
+- All AI agent API traffic must route through GovCloud-authorized endpoints only.
+- No organizational data from Federal systems may be sent to commercial AI endpoints.
+- Data residency requirements apply: AI model inference must occur within approved regions.
+- Logging of agent interactions must comply with NIST 800-53 AU (Audit and Accountability) controls.
 
 ---
 
@@ -87,8 +87,8 @@ For teams working in regulated environments (e.g., FedRAMP, HIPAA, PCI-DSS, GDPR
 ### 5.1 API Key Management
 
 - AI agent API keys and tokens are managed centrally by the platform team.
-- Keys are stored in your organization's secrets management service (e.g., HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager).
-- Developers do not have direct access to API keys. Keys are injected into dev environments and CI environments at runtime.
+- Keys are stored in AWS Secrets Manager (commercial) or AWS Secrets Manager in GovCloud (Federal).
+- Developers do not have direct access to API keys. Keys are injected into devcontainers and CI environments at runtime.
 - Personal API keys for approved tools are prohibited for organizational work.
 
 ### 5.2 Developer Access
@@ -100,9 +100,9 @@ For teams working in regulated environments (e.g., FedRAMP, HIPAA, PCI-DSS, GDPR
 
 ### 5.3 Agent Access to Systems
 
-- Agents in IDE/dev environment: access to local project workspace only. No access to other projects, host filesystem, or credential stores.
-- Agents in CI: read access to repo checkout. Write access limited to PR/MR comments. No deployment credentials.
-- Agents in ops: read-only access to logs and metrics via scoped access role. Controlled write mode requires Level 4 maturity and IC approval (see runbook-agent-safety.md).
+- Agents in IDE/devcontainer: access to local project workspace only. No access to other projects, host filesystem, or credential stores.
+- Agents in CI: read access to repo checkout. Write access limited to PR comments. No deployment credentials.
+- Agents in ops: read-only access to logs and metrics via scoped IAM role. Controlled write mode requires Level 4 maturity and IC approval (see runbook-agent-safety.md).
 
 ---
 
@@ -157,7 +157,7 @@ All AI agent API interactions are logged via the org API proxy. Logs include:
 - Repository or project context
 - Model used
 - Token count
-- Request and response hashes (full content in standard environments; hashes only in regulated environments, unless full logging is required by compliance)
+- Request and response hashes (full content in commercial; hashes only in Federal, unless full logging is required by compliance)
 
 ### 8.2 Audit
 
@@ -183,7 +183,7 @@ Exceptions to this policy (e.g., using an unapproved tool, sending confidential 
 6. **Approval**: Requires sign-off from:
    - AI Agent Working Group lead
    - Security team representative
-   - Compliance team representative (for exceptions impacting regulated environments)
+   - Compliance team representative (for Federal-impacting exceptions)
 
 **Exception log**: All exceptions are logged in [LOCATION] and reviewed during quarterly audits.
 
@@ -236,41 +236,17 @@ This policy is reviewed quarterly by the AI Agent Working Group. Updates are com
 
 ---
 
-## Appendix A: Regulated Environment Addendum
+## Appendix A: Federal Addendum
 
-For teams operating in regulated environments, the following additional requirements apply. Adapt this section to the specific frameworks your organization must comply with.
+For teams operating in Federal environments (FedRAMP, FISMA, NIST 800-53), the following additional requirements apply:
 
-### FedRAMP / FISMA (U.S. Federal)
-1. **Authorized endpoints only**: AI agent inference must use FedRAMP-authorized services (e.g., AWS Bedrock in GovCloud, Azure Gov). No exceptions.
-2. **Data residency**: All agent interaction data (prompts, responses, logs) must reside within approved GovCloud or government regions.
-3. **Audit controls**: Agent interaction logging must meet NIST 800-53 AU-2, AU-3, and AU-6 requirements.
-4. **Access control**: Agent access must comply with NIST 800-53 AC-2 and AC-6.
-5. **System security plan**: AI agent tooling must be documented in the relevant SSP.
+1. **Authorized endpoints only**: AI agent inference must use FedRAMP-authorized services (e.g., AWS Bedrock in GovCloud). No exceptions.
+2. **Data residency**: All agent interaction data (prompts, responses, logs) must reside within approved GovCloud regions.
+3. **Audit controls**: Agent interaction logging must meet NIST 800-53 AU-2 (Auditable Events), AU-3 (Content of Audit Records), and AU-6 (Audit Review, Analysis, and Reporting).
+4. **Access control**: Agent access must comply with NIST 800-53 AC-2 (Account Management) and AC-6 (Least Privilege).
+5. **System security plan**: AI agent tooling must be documented in the relevant system security plan (SSP).
 6. **Continuous monitoring**: Agent usage is included in the continuous monitoring program per NIST 800-53 CA-7.
-7. **Incident response**: Agent-related incidents must be reported per Federal incident reporting timelines.
-
-### HIPAA (Healthcare)
-1. **No PHI in prompts**: AI agents must never process protected health information.
-2. **BAA coverage**: If the AI service processes any data from systems that handle PHI, a Business Associate Agreement must be in place.
-3. **Audit trail**: Agent interactions on systems in scope for HIPAA must have audit trails meeting HIPAA Security Rule requirements.
-4. **Minimum necessary**: Agent access follows the minimum necessary standard.
-
-### PCI-DSS (Payment Card)
-1. **No cardholder data**: AI agents must never process cardholder data (PAN, CVV, etc.).
-2. **Network segmentation**: Agents operating on systems in the cardholder data environment must use isolated, segmented network paths.
-3. **Access control**: Agent access to CDE systems follows PCI-DSS Requirement 7 (restrict access by business need).
-4. **Logging**: Agent interactions on CDE systems must meet PCI-DSS Requirement 10 (track and monitor all access).
-
-### GDPR (EU Data Protection)
-1. **No personal data in prompts**: AI agents must not process personal data as defined by GDPR unless a lawful basis exists and a DPIA has been completed.
-2. **Data transfer**: If the AI inference endpoint is outside the EU/EEA, appropriate transfer mechanisms (SCCs, adequacy decisions) must be in place.
-3. **Record-keeping**: Agent usage involving personal data must be documented per Article 30.
-4. **Data subject rights**: Processes must exist to handle data subject requests for any data processed by agents.
-
-### SOC 2
-1. **Access controls**: Agent access is governed by organization-wide access control policies aligned with SOC 2 Trust Services Criteria (CC6).
-2. **Monitoring**: Agent usage is included in the organization's monitoring controls per CC7.
-3. **Change management**: Changes to agent tooling and configuration follow the organization's change management process per CC8.
+7. **Incident response**: Agent-related incidents in Federal environments must be reported per the Federal incident reporting timeline (US-CERT notification within the required window).
 
 This addendum supersedes the main policy where there is a conflict. If in doubt, apply the more restrictive rule.
 
@@ -283,10 +259,10 @@ AI AGENT POLICY - QUICK REFERENCE
 
 APPROVED TOOLS ONLY:     Use only tools on the approved list with org-managed accounts.
 NO PERSONAL KEYS:        Use org-provided credentials, not personal API keys.
-NO SECRETS IN PROMPTS:   Never paste API keys, passwords, PII, or classified data into agent prompts.
+NO SECRETS IN PROMPTS:   Never paste API keys, passwords, PII, or CUI into agent prompts.
 LABEL YOUR WORK:         Tag agent-assisted commits and PRs.
 HUMAN REVIEW REQUIRED:   Every agent-generated PR needs at least one human reviewer.
-REGULATED IS DIFFERENT:  Regulated environments use approved endpoints only. Stricter rules apply.
+FEDERAL IS DIFFERENT:    Federal environments use GovCloud endpoints only. Stricter rules apply.
 REPORT PROBLEMS:         If an agent generates something concerning, tell your lead and security.
 ASK QUESTIONS:           If you are unsure whether something is allowed, ask the Working Group.
 ```

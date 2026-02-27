@@ -16,16 +16,16 @@ AI-CMM gives engineering leaders, platform teams, and security/compliance teams 
 
 ## What's Included
 
-| Resource                                                 | Description                                                                       |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [Maturity Model](docs/ai-agent-cmm.md)                   | 6-level (0-5) model across 9 capability domains                                   |
-| [Assessment Rubric](docs/assessment-rubric.md)           | Scoring criteria, evidence checklist, and interview questions for self-assessment |
-| [Interactive Assessment](public/assessment/index.html)   | Browser-based tool to score your org, generate a radar chart, and build a 90-day plan |
-| [Executive Summary](public/executive-summary/index.html) | Printable one-pager overview of the CMM for leadership and stakeholders           |
+| Resource                                                 | Description                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [Maturity Model](docs/ai-agent-cmm.md)                   | 6-level (0-5) model across 9 capability domains                                             |
+| [Assessment Rubric](docs/assessment-rubric.md)           | Scoring criteria, evidence checklist, and interview questions for self-assessment           |
+| [Interactive Assessment](public/assessment/index.html)   | Browser-based tool to score your org, generate a radar chart, and build a 90-day plan       |
+| [Executive Summary](public/executive-summary/index.html) | Printable one-pager overview of the CMM for leadership and stakeholders                     |
 | [Domain Deep-Dive](public/domains/index.html)            | Detailed reference for all 9 domains with practices, artifacts, and anti-patterns per level |
-| [Anti-Pattern Checker](public/anti-patterns/index.html)  | Interactive diagnostic to identify common risks and get targeted mitigations       |
-| [Reference Architecture](docs/reference-architecture.md) | Component diagrams and data flows for IDE, CI/CD, and Ops agent integration       |
-| [Adoption Roadmap](docs/roadmap-template.md)             | 90-day pilot + 12-month scaling plan with workstreams, KPIs, and risk register    |
+| [Anti-Pattern Checker](public/anti-patterns/index.html)  | Interactive diagnostic to identify common risks and get targeted mitigations                |
+| [Reference Architecture](docs/reference-architecture.md) | Component diagrams and data flows for IDE, CI/CD, and Ops agent integration                 |
+| [Adoption Roadmap](docs/roadmap-template.md)             | 90-day pilot + 12-month scaling plan with workstreams, KPIs, and risk register              |
 
 ### Templates (copy, customize, adopt)
 
@@ -125,6 +125,12 @@ All templates are in the [`templates/`](templates/) directory. They are designed
 ├── CODE_OF_CONDUCT.md
 └── SECURITY.md
 ```
+
+## Content Source of Truth
+
+- Canonical content lives in `docs/`, `templates/`, and `examples/`.
+- Markdown under `public/docs/`, `public/templates/`, and `public/examples/` is a mirrored copy used by the static site.
+- When updating canonical content, update the corresponding `public/` mirror in the same change to avoid drift.
 
 ---
 

@@ -8,7 +8,7 @@ These prompts are designed to be used with AI coding agents (Claude Code, Copilo
 - **The prompt**: copy-paste or adapt to your task.
 - **What to verify**: what a human should check in the output.
 
-Customize these prompts for your specific repo by adding them to your project-level agent instructions or prompt snippets file.
+Customize these prompts for your specific repo by adding them to your CLAUDE.md or prompt snippets file.
 
 ---
 
@@ -16,13 +16,13 @@ Customize these prompts for your specific repo by adding them to your project-le
 
 ### Prompt 1.1: Extract Function
 
-**Context needed**: The file containing the code to refactor. Agent instruction file with project conventions.
+**Context needed**: The file containing the code to refactor. CLAUDE.md with project conventions.
 
 **Prompt**:
 ```
 Read [FILE_PATH]. The block of code between lines [START] and [END] should be extracted
-into a separate function. Follow the naming conventions in the project's agent instructions
-or style guide. The new function should:
+into a separate function. Follow the naming conventions in CLAUDE.md. The new function
+should:
 - Have a clear, descriptive name
 - Accept only the parameters it needs (no passing large objects when only one field is used)
 - Include type annotations consistent with the rest of the file
@@ -105,15 +105,15 @@ Use the test infrastructure described in [TEST_INFRA_DOC]. Follow these constrai
 
 ### Prompt 3.1: Diagnose CI Failure
 
-**Context needed**: CI log output (paste relevant section). The pipeline config file. The failing step.
+**Context needed**: CI log output (paste relevant section). The workflow file. The failing step.
 
 **Prompt**:
 ```
-Here is a CI failure log:
+Here is a CI failure log from GitHub Actions:
 
 [PASTE CI LOG]
 
-The failing step is [STEP_NAME] in pipeline config [CONFIG_FILE].
+The failing step is [STEP_NAME] in workflow [WORKFLOW_FILE].
 
 Diagnose the root cause. Consider:
 - Dependency version changes
@@ -122,7 +122,7 @@ Diagnose the root cause. Consider:
 - Missing environment variables or secrets
 - Permission issues
 
-Propose a fix. If the fix involves changing the pipeline config, show the diff.
+Propose a fix. If the fix involves changing the workflow file, show the diff.
 If the fix involves changing application code, show the diff and explain why.
 Do not propose suppressing the error without fixing the root cause.
 ```
@@ -131,11 +131,11 @@ Do not propose suppressing the error without fixing the root cause.
 
 ### Prompt 3.2: Optimize Pipeline Speed
 
-**Context needed**: The pipeline config file. Pipeline timing data (which steps are slowest).
+**Context needed**: The workflow file. Pipeline timing data (which steps are slowest).
 
 **Prompt**:
 ```
-Read [CONFIG_FILE]. Here are the step durations from the last 5 runs:
+Read [WORKFLOW_FILE]. Here are the step durations from the last 5 runs:
 
 [PASTE TIMING DATA]
 
@@ -154,50 +154,50 @@ Do not remove any security-related steps (secrets scan, SAST, dependency audit).
 
 ---
 
-## Category 4: IaC Module
+## Category 4: Terraform Module
 
-### Prompt 4.1: Generate IaC Module
+### Prompt 4.1: Generate Terraform Module
 
-**Context needed**: Agent instruction file with IaC conventions. Existing module examples. Cloud provider and region constraints.
+**Context needed**: CLAUDE.md with IaC conventions. Existing module examples. AWS region and account constraints.
 
 **Prompt**:
 ```
-Create an IaC module for [RESOURCE_DESCRIPTION]. Follow the conventions in the project's
-agent instructions and use the structure from [EXAMPLE_MODULE_PATH] as a reference.
+Create a Terraform module for [RESOURCE_DESCRIPTION]. Follow the conventions in CLAUDE.md
+and use the structure from [EXAMPLE_MODULE_PATH] as a reference.
 
 Requirements:
-- Module structure: main.tf, variables.tf, outputs.tf, README.md (adjust for your IaC tool)
+- Module structure: main.tf, variables.tf, outputs.tf, README.md
 - Use modules from the internal registry ([REGISTRY_URL]) where available
-- All resources must have tags/labels: Name, Environment, Team, ManagedBy=terraform
-- No wildcard IAM/RBAC actions or resources
+- All resources must have tags: Name, Environment, Team, ManagedBy=terraform
+- No wildcard IAM actions or resources
 - Encryption at rest and in transit where applicable
 - Logging enabled where applicable
 
-For regulated environments, also include:
-- [LIST_ENVIRONMENT_SPECIFIC_REQUIREMENTS, e.g., CMK encryption, VPC flow logs, access logging]
+For Federal environments, also include:
+- [LIST_FEDERAL_SPECIFIC_REQUIREMENTS, e.g., KMS CMK encryption, VPC flow logs, access logging]
 
 Output the complete module files. Include variable descriptions and sensible defaults.
 ```
 
-**What to verify**: Module passes validation and linting. No wildcard IAM/RBAC. Tags are correct. Regulated-environment requirements are met. Module uses internal registry modules where appropriate.
+**What to verify**: Module passes `terraform validate` and tflint/tfsec. No wildcard IAM. Tags are correct. Federal requirements are met. Module uses internal registry modules where appropriate.
 
-### Prompt 4.2: Review IaC Plan
+### Prompt 4.2: Review Terraform Plan
 
-**Context needed**: IaC `plan` output. The module source code.
+**Context needed**: `terraform plan` output. The module source code.
 
 **Prompt**:
 ```
-Review this IaC plan output:
+Review this Terraform plan output:
 
 [PASTE PLAN OUTPUT]
 
 Check for:
 - Resources being destroyed unexpectedly (should be zero unless this is intentional)
-- IAM/RBAC policy changes (flag any permission escalation)
-- Network security changes (flag any new ingress from 0.0.0.0/0 or equivalent)
+- IAM policy changes (flag any permission escalation)
+- Security group changes (flag any new ingress from 0.0.0.0/0)
 - Cost implications (new resources, size changes)
-- Missing tags/labels on new resources
-- Changes that affect availability (instance type changes, zone changes)
+- Missing tags on new resources
+- Changes that affect availability (instance type changes, AZ changes)
 
 Summarize:
 1. Safe changes (no risk)
@@ -213,7 +213,7 @@ Summarize:
 
 ### Prompt 5.1: Log Analysis
 
-**Context needed**: Log excerpt from your monitoring system. Service architecture description. Recent deployment history.
+**Context needed**: CloudWatch log excerpt. Service architecture description. Recent deployment history.
 
 **Prompt**:
 ```

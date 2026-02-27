@@ -2,7 +2,7 @@
 
 ## Instructions
 
-Copy this checklist into your PR or merge request template (e.g., `.github/PULL_REQUEST_TEMPLATE.md`, GitLab MR description template, or equivalent). All items apply to every PR. Items marked **(Agent)** are additional checks required when the PR includes agent-generated or agent-assisted code.
+Copy this checklist into your PR template (`.github/PULL_REQUEST_TEMPLATE.md`). All items apply to every PR. Items marked **(Agent)** are additional checks required when the PR includes agent-generated or agent-assisted code.
 
 ---
 
@@ -28,7 +28,7 @@ Copy this checklist into your PR or merge request template (e.g., `.github/PULL_
 - [ ] No commented-out code left behind
 - [ ] No TODO comments without a linked issue
 - [ ] **(Agent)** Reviewed for over-abstraction (agents tend to create unnecessary helpers, wrappers, or interfaces)
-- [ ] **(Agent)** Reviewed for hallucinated imports or dependencies (packages that do not exist or are not in the approved list)
+- [ ] **(Agent)** Reviewed for hallucinated imports or dependencies (packages that do not exist or are not in our approved list)
 - [ ] **(Agent)** Reviewed for incorrect error handling (agents sometimes swallow errors or use overly broad catch blocks)
 - [ ] **(Agent)** Reviewed for copy-paste patterns that should use existing shared utilities
 
@@ -48,32 +48,32 @@ Copy this checklist into your PR or merge request template (e.g., `.github/PULL_
 - [ ] Input validation is present at trust boundaries
 - [ ] Dependencies added are from approved sources and scanned for vulnerabilities
 - [ ] **(Agent)** SAST scan passes with no new findings
-- [ ] **(Agent)** No new permissions or IAM/RBAC changes without security team review
+- [ ] **(Agent)** No new permissions or IAM changes without security team review
 - [ ] **(Agent)** No changes to authentication or authorization logic without security team review
 
 ## Infrastructure as Code (if applicable)
 
-- [ ] IaC validation passes (e.g., `terraform validate`)
-- [ ] Linter passes with no new findings (e.g., tflint, tfsec, checkov)
-- [ ] Plan output reviewed and posted to PR
-- [ ] No wildcard IAM/RBAC actions or resources
-- [ ] All resources have required tags/labels (Name, Environment, Team, ManagedBy)
-- [ ] Regulatory compliance controls are met (if targeting a regulated environment)
+- [ ] `terraform validate` passes
+- [ ] Linter (tflint/tfsec/checkov) passes with no new findings
+- [ ] `terraform plan` output reviewed and posted to PR
+- [ ] No wildcard IAM actions or resources
+- [ ] All resources have required tags (Name, Environment, Team, ManagedBy)
+- [ ] Federal compliance controls are met (if targeting Federal environment)
 - [ ] **(Agent)** Uses internal module registry modules where available (not raw resources)
-- [ ] **(Agent)** Cost estimation reviewed (if Infracost or equivalent is configured)
+- [ ] **(Agent)** Cost estimation reviewed (if Infracost is configured)
 
 ## CI/CD (if modifying pipelines)
 
-- [ ] Pipeline changes have been tested (e.g., on a feature branch with manual trigger)
+- [ ] Workflow changes have been tested (e.g., on a feature branch with `workflow_dispatch`)
 - [ ] No new secrets or credentials added without platform team review
-- [ ] No use of security-sensitive triggers or configurations without security review
-- [ ] **(Agent)** Pipeline changes use shared/reusable components where available
+- [ ] No use of `pull_request_target` or other security-sensitive triggers without security review
+- [ ] **(Agent)** Pipeline changes use shared/reusable actions where available
 
 ## Documentation
 
 - [ ] README updated if public API or configuration changed
 - [ ] ADR created if an architectural decision was made
-- [ ] Agent instruction file updated if project conventions changed
+- [ ] CLAUDE.md updated if project conventions changed
 - [ ] **(Agent)** Agent-generated documentation reviewed for accuracy (agents may hallucinate features or API details)
 
 ## High-Risk Change Review (if applicable)
@@ -82,14 +82,14 @@ If this PR touches any high-risk category, the additional reviewers listed must 
 
 | Category | Required Reviewer(s) |
 |----------|---------------------|
-| Identity/access policy changes | Security team + infrastructure team |
-| Network security changes (firewalls, ACLs, security groups) | Security team |
+| IAM policy changes | Security team + infrastructure team |
+| Network security changes (SGs, NACLs, VPC) | Security team |
 | Database schema migrations | DBA/data team + application team |
 | CI/CD pipeline modifications | Platform team |
 | Secrets or credential handling | Security team |
 | Authentication/authorization logic | Security team + application team |
-| Production infrastructure (IaC) | Infrastructure team + change advisory |
-| Regulated environment changes | Compliance team + security team |
+| Production infrastructure (Terraform) | Infrastructure team + change advisory |
+| Federal environment changes | Compliance team + security team |
 | New dependency additions / major version upgrades | Application team lead |
 | Data pipeline or ETL changes | Data team + compliance |
 

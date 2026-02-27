@@ -60,6 +60,32 @@ jobs:
           echo "Agent PR detected: $IS_AGENT"
 
   # ------------------------------------------------------------------
+  # Step 1b: Detect changed file categories
+  # ------------------------------------------------------------------
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      dependency_files: ${{ steps.filter.outputs.dependency_files }}
+      tf_files: ${{ steps.filter.outputs.tf_files }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            dependency_files:
+              - 'package.json'
+              - 'package-lock.json'
+              - 'requirements.txt'
+              - 'go.mod'
+              - 'Cargo.toml'
+            tf_files:
+              - '**/*.tf'
+
+  # ------------------------------------------------------------------
   # Step 2: Secrets scanning (runs on ALL PRs)
   # ------------------------------------------------------------------
   secrets-scan:
@@ -83,13 +109,8 @@ jobs:
   # ------------------------------------------------------------------
   dependency-audit:
     runs-on: ubuntu-latest
-    # Only run when dependency files change
-    if: |
-      contains(github.event.pull_request.changed_files, 'package.json') ||
-      contains(github.event.pull_request.changed_files, 'package-lock.json') ||
-      contains(github.event.pull_request.changed_files, 'requirements.txt') ||
-      contains(github.event.pull_request.changed_files, 'go.mod') ||
-      contains(github.event.pull_request.changed_files, 'Cargo.toml')
+    needs: detect-changes
+    if: needs.detect-changes.outputs.dependency_files == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -120,8 +141,8 @@ jobs:
   # ------------------------------------------------------------------
   iac-policy-check:
     runs-on: ubuntu-latest
-    if: |
-      contains(github.event.pull_request.changed_files, '.tf')
+    needs: detect-changes
+    if: needs.detect-changes.outputs.tf_files == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

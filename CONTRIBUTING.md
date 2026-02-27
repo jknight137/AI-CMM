@@ -48,7 +48,7 @@ Thank you for your interest in improving the AI Agent Capability Maturity Model.
 
 ## Reporting Issues
 
-If you find an error, have a question, or want to suggest an improvement, please [open an issue](../../issues). Include:
+If you find an error, have a question, or want to suggest an improvement, please [open an issue](https://github.com/jknight137/AICMM/issues). Include:
 
 - Which document or section is affected.
 - What's wrong or what's missing.

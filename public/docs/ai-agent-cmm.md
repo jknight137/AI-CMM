@@ -2,16 +2,14 @@
 
 ## Assumptions
 
-This model is designed to be platform-agnostic. Adapt it to your organization's technology stack. Common choices include:
-
-- **Cloud**: AWS, Azure, GCP, or private cloud. Multi-cloud organizations should assess each environment separately where tooling differs.
-- **Source control and CI/CD**: GitHub (GitHub Actions), GitLab (GitLab CI), Bitbucket (Bitbucket Pipelines), Azure DevOps, or other platforms.
-- **Artifact management**: Artifactory, Nexus, GitHub Packages, GitLab Container Registry, AWS CodeArtifact, Azure Artifacts, or similar.
-- **Development environments**: Development containers (devcontainers), GitHub Codespaces, GitLab Web IDE, Gitpod, JetBrains remote development, or other remote/containerized dev environments.
-- **Container orchestration**: Kubernetes, Amazon ECS, Azure Container Apps, Google Cloud Run, serverless compute, or VM-based deployments.
-- **Compliance**: Organizations may operate under one or more regulatory frameworks: FedRAMP, FISMA, HIPAA, SOC 2, PCI-DSS, GDPR, ISO 27001, or industry-specific standards. Regulated environments have stricter data residency, logging, and access-control requirements.
-- **AI agents in scope**: IDE-integrated agents (Copilot, Claude Code, Cursor, Cody), CI-embedded agents (Codex, Claude Code in pipelines), and operational agents used for incident response or infrastructure changes.
-- **Organizational posture**: The organization wants to adopt AI agents deliberately, with measurable guardrails, not by blanket prohibition or uncontrolled adoption.
+- **Cloud**: AWS (commercial and GovCloud regions). No Azure in scope.
+- **Source control and CI/CD**: GitHub (GitHub Actions for pipelines).
+- **Artifact management**: JFrog Artifactory for container images, packages, and binaries.
+- **Development environments**: Development containers (devcontainers) as the standard inner-loop environment.
+- **Container orchestration**: No Kubernetes yet; workloads run on ECS, Lambda, or EC2-based deployments.
+- **Compliance**: The org operates in both commercial and Federal (FedRAMP/FISMA/NIST 800-53) environments. Federal environments have stricter data residency, logging, and access-control requirements.
+- **AI agents in scope**: IDE-integrated agents (Copilot, Claude Code, Cursor), CI-embedded agents (Codex, Claude Code in pipelines), and operational agents used for incident response or infrastructure changes.
+- **Organizational posture**: The org wants to adopt AI agents deliberately, with measurable guardrails, not by blanket prohibition or uncontrolled adoption.
 
 ---
 
@@ -30,10 +28,10 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 
 ## Capability Domains
 
-1. **Dev Workflow** -- How agents are used during local development (IDE, dev environments, CLI).
+1. **Dev Workflow** -- How agents are used during local development (IDE, devcontainers, CLI).
 2. **PR and Code Review** -- How agent-generated code is reviewed, labeled, and merged.
 3. **CI/CD** -- How agents participate in build, test, deploy pipelines.
-4. **Infrastructure as Code (IaC)** -- How agents generate, modify, and validate Terraform/OpenTofu/Pulumi/CloudFormation.
+4. **Infrastructure as Code (IaC)** -- How agents generate, modify, and validate Terraform/OpenTofu.
 5. **Ops and Incident Response** -- How agents assist during incidents, runbooks, and operational tasks.
 6. **Security and Compliance** -- How agent usage meets security policies, data classification, and regulatory requirements.
 7. **Knowledge Management** -- How agents consume and contribute to org documentation, ADRs, and context.
@@ -59,38 +57,38 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 #### Level 2 -- Defined
 - **Required practices**:
   - Approved agent tools list is published and maintained.
-  - Development environment definitions include agent tooling and configuration (extensions, CLI tools, project-level config files).
-  - Developers use only org-approved API endpoints (e.g., cloud-hosted model APIs or an org-managed proxy).
-  - Project-level agent instructions exist in repositories (e.g., CLAUDE.md, .github/copilot-instructions.md, or equivalent).
+  - Devcontainer definitions include agent tooling and configuration (extensions, CLI tools, `.claude/` config).
+  - Developers use only org-approved API endpoints (e.g., Anthropic via AWS Bedrock or org-managed proxy).
+  - CLAUDE.md or equivalent project-level instructions exist in repositories.
 - **Required artifacts**:
   - Approved tools list (living document or wiki page).
-  - Development environment configuration with agent tooling pre-installed.
-  - Repository-level agent instructions file.
-- **Anti-patterns**: Approving tools but not configuring them; developers still use personal accounts. Dev environments exist but do not include agent tooling.
+  - Devcontainer configuration with agent tooling pre-installed.
+  - Repository-level agent instructions file (CLAUDE.md, .github/copilot-instructions.md).
+- **Anti-patterns**: Approving tools but not configuring them; developers still use personal accounts. Devcontainers exist but do not include agent tooling.
 
 #### Level 3 -- Managed
 - **Required practices**:
   - Agent usage telemetry is collected (opt-in or org-managed): number of completions, acceptances, languages, repos.
-  - Development environment images are built and published through your artifact registry with agent tooling baked in.
-  - Standardized agent instruction templates are maintained per project type (service, library, IaC module).
+  - Devcontainer images are built and published through Artifactory with agent tooling baked in.
+  - Standardized CLAUDE.md templates are maintained per project type (service, library, IaC module).
   - Context management is intentional: agents are given curated docs, not raw repo dumps.
 - **Required artifacts**:
-  - Telemetry dashboard (e.g., cloud monitoring service, Datadog, Grafana, or internal tool).
-  - Registry-hosted dev environment images with version tags.
-  - Agent instruction template library.
-- **Anti-patterns**: Collecting telemetry but never reviewing it. Dev environment images are stale and lag behind tooling updates.
+  - Telemetry dashboard (e.g., CloudWatch, Datadog, or internal tool).
+  - Artifactory-hosted devcontainer images with version tags.
+  - CLAUDE.md template library.
+- **Anti-patterns**: Collecting telemetry but never reviewing it. Devcontainer images are stale and lag behind tooling updates.
 
 #### Level 4 -- Optimized
 - **Required practices**:
   - Agents are embedded in developer workflows end-to-end: scaffold, implement, test, document.
   - Agent-generated code is automatically labeled in commits and PRs (trailers, labels, or metadata).
-  - IDE agent configurations are version-controlled and deployed via dev environment features or setup scripts.
+  - IDE agent configurations are version-controlled and deployed via devcontainer features.
   - Cross-repo context is available to agents through indexed documentation or retrieval-augmented generation (RAG).
 - **Required artifacts**:
   - Commit trailer convention (e.g., `Co-Authored-By: Claude <noreply@anthropic.com>`).
-  - Dev environment feature or configuration package for agent setup.
+  - Devcontainer feature for agent configuration.
   - Documentation index or RAG pipeline.
-- **Anti-patterns**: Agents have unrestricted filesystem or network access in dev environments. No differentiation between agent-assisted and human-written code.
+- **Anti-patterns**: Agents have unrestricted filesystem or network access in devcontainers. No differentiation between agent-assisted and human-written code.
 
 #### Level 5 -- Adaptive
 - **Required practices**:
@@ -124,16 +122,16 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
   - PR checklist includes agent-specific items (see `templates/pr-checklist.md`).
 - **Required artifacts**:
   - PR template with agent disclosure field.
-  - Branch protection or merge request approval rules enforcing at least one approval.
+  - Branch protection rules enforcing at least one approval.
 - **Anti-patterns**: Checklist exists but reviewers skip agent-specific items. No difference in review rigor for agent-generated code.
 
 #### Level 3 -- Managed
 - **Required practices**:
-  - Agent-generated PRs are automatically labeled (via CI automation or bot).
+  - Agent-generated PRs are automatically labeled (via GitHub Actions or bot).
   - Review metrics are tracked separately for agent-generated vs. human-written PRs: time-to-merge, defect rate, rework rate.
   - Reviewers receive guidance on what to look for in agent-generated code (over-abstraction, hallucinated imports, incorrect error handling).
 - **Required artifacts**:
-  - CI automation or bot that auto-labels agent PRs.
+  - GitHub Action or bot that auto-labels agent PRs.
   - Review guidance document.
   - Dashboard splitting PR metrics by agent vs. human origin.
 - **Anti-patterns**: Auto-labeling is noisy or inaccurate, causing label fatigue. Metrics are collected but not acted on.
@@ -144,10 +142,10 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
   - High-risk changes (see High-Risk Change Categories below) from agents require additional reviewer or team lead approval.
   - Agent-generated PRs include structured context: the prompt used, files read, and changes made.
 - **Required artifacts**:
-  - CI gate configuration for agent PRs (see `examples/ci-gates/`).
-  - Code ownership rules for high-risk paths (e.g., CODEOWNERS, GitLab Code Owners, or equivalent).
+  - CI gate configuration for agent PRs (see `examples/github-actions/agent-gates.yml`).
+  - CODEOWNERS rules for high-risk paths.
   - Structured PR description template showing agent context.
-- **Anti-patterns**: Over-reliance on automated checks; humans stop reading diffs. Code ownership rules are outdated and do not reflect actual ownership.
+- **Anti-patterns**: Over-reliance on automated checks; humans stop reading diffs. CODEOWNERS rules are outdated and do not reflect actual ownership.
 
 #### Level 5 -- Adaptive
 - **Required practices**:
@@ -170,20 +168,20 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 - **Anti-patterns**: No CI/CD exists, or agents have no interaction with pipelines.
 
 #### Level 1 -- Exploratory
-- **Required practices**: Developers occasionally ask agents to help write or debug CI/CD pipelines.
+- **Required practices**: Developers occasionally ask agents to help write or debug GitHub Actions workflows.
 - **Required artifacts**: None required.
-- **Anti-patterns**: Agent-generated pipeline files are committed without testing. Agents suggest using security-sensitive triggers or configurations without understanding the risk.
+- **Anti-patterns**: Agent-generated workflow files are committed without testing. Agents suggest using `pull_request_target` or other security-sensitive triggers without understanding the risk.
 
 #### Level 2 -- Defined
 - **Required practices**:
-  - Agents are not permitted to modify CI/CD pipeline definitions without human review (enforced via code ownership rules on pipeline config directories).
-  - A library of approved, reusable pipeline components exists and agents are instructed to use them.
-  - Pipeline definitions follow a standard structure documented in agent instructions or a contributing guide.
+  - Agents are not permitted to modify CI/CD pipeline definitions without human review (enforced via CODEOWNERS on `.github/workflows/`).
+  - A library of approved, reusable GitHub Actions exists and agents are instructed to use them.
+  - Pipeline definitions follow a standard structure documented in a CLAUDE.md or contributing guide.
 - **Required artifacts**:
-  - Code ownership rules for pipeline configuration files.
-  - Reusable pipeline component library (in a shared repo or artifact registry).
+  - CODEOWNERS entry for `.github/workflows/`.
+  - Reusable Actions library (in a shared repo or Artifactory).
   - Pipeline authoring guide.
-- **Anti-patterns**: Agents freely create new pipelines without review. No reusable components; every repo has bespoke pipeline logic.
+- **Anti-patterns**: Agents freely create new workflows without review. No reusable actions; every repo has bespoke pipeline logic.
 
 #### Level 3 -- Managed
 - **Required practices**:
@@ -192,8 +190,8 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
   - Agent CI step outputs are logged and auditable.
 - **Required artifacts**:
   - Agent CI step definitions (containerized, least-privilege).
-  - Audit log configuration (CI logs retained, forwarded to your monitoring/SIEM system).
-  - Container images for agent CI steps published in your artifact registry.
+  - Audit log configuration (GitHub Actions logs retained, forwarded to CloudWatch or SIEM).
+  - Container images for agent CI steps published in Artifactory.
 - **Anti-patterns**: Agent CI steps have access to production secrets. Agent CI outputs are not logged. Agent containers are pulled from public registries without verification.
 
 #### Level 4 -- Optimized
@@ -209,7 +207,7 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 
 #### Level 5 -- Adaptive
 - **Required practices**:
-  - Agents autonomously maintain CI health: update pinned dependency versions, rotate test fixtures, fix flaky tests (with human approval on the resulting PR).
+  - Agents autonomously maintain CI health: update pinned action versions, rotate test fixtures, fix flaky tests (with human approval on the resulting PR).
   - Pipeline configurations are generated from higher-level intent files, with agents handling the translation.
   - Agent CI contributions are measured against the same quality bar as human contributions.
 - **Required artifacts**:
@@ -228,44 +226,44 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 - **Anti-patterns**: Infrastructure is manually provisioned. No IaC exists.
 
 #### Level 1 -- Exploratory
-- **Required practices**: Developers use agents to generate IaC snippets or modules in their IDE.
+- **Required practices**: Developers use agents to generate Terraform snippets or modules in their IDE.
 - **Required artifacts**: None required.
-- **Anti-patterns**: Agent-generated IaC is applied without `plan` review. Agents generate resources with overly permissive IAM/RBAC policies (e.g., `"Action": "*"`, `Owner` role on a subscription, etc.).
+- **Anti-patterns**: Agent-generated Terraform is applied without `plan` review. Agents generate resources with overly permissive IAM policies (e.g., `"Action": "*"`).
 
 #### Level 2 -- Defined
 - **Required practices**:
-  - Agents are instructed (via project-level config or equivalent) to follow org IaC conventions: module structure, naming, tagging, backend configuration.
-  - Agent-generated IaC must pass validation and a linter (tflint, checkov, tfsec, or equivalent) before merge.
-  - Agents are prohibited from generating identity/access policies with wildcard actions or resources unless explicitly approved.
-  - Regulated environment modules are separated from standard modules, with distinct variable files and backend configurations.
+  - Agents are instructed (via CLAUDE.md or equivalent) to follow org Terraform conventions: module structure, naming, tagging, backend configuration.
+  - Agent-generated IaC must pass `terraform validate` and a linter (tflint, checkov, or tfsec) before merge.
+  - Agents are prohibited from generating IAM policies with wildcard actions or resources unless explicitly approved.
+  - Federal environment modules are separated from commercial modules, with distinct variable files and backend configurations.
 - **Required artifacts**:
-  - IaC style guide.
+  - Terraform style guide.
   - Linter configuration files (checked into repos).
-  - Agent instructions with IaC-specific rules.
-  - Separate module paths or workspaces for regulated vs. standard environments.
-- **Anti-patterns**: Style guide exists but agents are not given it as context. Linters run but failures are ignored. Regulated and standard IaC is co-mingled without clear boundaries.
+  - CLAUDE.md with IaC-specific instructions.
+  - Separate module paths or workspaces for Federal vs. commercial.
+- **Anti-patterns**: Style guide exists but agents are not given it as context. Linters run but failures are ignored. Federal and commercial IaC is co-mingled without clear boundaries.
 
 #### Level 3 -- Managed
 - **Required practices**:
-  - Agents generate IaC using an org-approved module registry (hosted in your artifact registry or an internal repository).
-  - `plan` output is posted to PRs automatically; agent-generated IaC PRs require plan review before approval.
+  - Agents generate Terraform using org-approved module registry (Artifactory-hosted or internal GitHub repo).
+  - `terraform plan` output is posted to PRs automatically; agent-generated IaC PRs require plan review before approval.
   - Drift detection runs on a schedule; agents can propose remediation PRs.
   - Cost estimation (Infracost or similar) runs on agent-generated IaC PRs.
 - **Required artifacts**:
-  - Internal module registry.
-  - CI automation for posting plan output as PR comments.
+  - Internal module registry in Artifactory or GitHub.
+  - GitHub Action for `terraform plan` comment on PRs.
   - Drift detection pipeline.
   - Cost estimation integration.
 - **Anti-patterns**: Agents generate raw resources instead of using approved modules. Plan output is posted but reviewers do not read it. Cost estimates are ignored.
 
 #### Level 4 -- Optimized
 - **Required practices**:
-  - Agents can generate complete, compliant modules from high-level requirements (e.g., "create a storage bucket for log storage with regulatory compliance controls").
-  - Generated modules are automatically validated against OPA/Sentinel/custom policies before plan.
+  - Agents can generate complete, compliant modules from high-level requirements (e.g., "create an S3 bucket for log storage with Federal compliance controls").
+  - Generated modules are automatically validated against OPA/Sentinel policies before plan.
   - Agent-generated IaC changes to production environments require a separate approval from the infrastructure team.
-  - Regulatory controls (encryption, logging, access restrictions) are enforced by policy-as-code, not by relying on the agent to remember them.
+  - Federal-specific controls (encryption, logging, access restrictions) are enforced by policy-as-code, not by relying on the agent to remember them.
 - **Required artifacts**:
-  - Policy-as-code library (OPA, Sentinel, or equivalent).
+  - OPA/Sentinel policy library.
   - Approval workflow for production IaC changes.
   - Policy-as-code enforcement in CI.
 - **Anti-patterns**: Policy-as-code exists but is not enforced in CI. Agents bypass the module registry for "simple" resources. Production approval is a rubber stamp.
@@ -298,11 +296,11 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 #### Level 2 -- Defined
 - **Required practices**:
   - Agent usage during incidents follows the runbook safety rules (see `templates/runbook-agent-safety.md`).
-  - Agents used in ops contexts have read-only access to logs and metrics (via your cloud monitoring service). No write access to production systems.
+  - Agents used in ops contexts have read-only access to logs and metrics (CloudWatch, Datadog). No write access to production systems.
   - Incident summaries generated by agents are reviewed by the incident commander before distribution.
 - **Required artifacts**:
   - Runbook safety rules for agent usage.
-  - Read-only access role for agent ops access.
+  - Read-only IAM role for agent ops access.
   - Incident summary review checklist.
 - **Anti-patterns**: Agents have the same credentials as the on-call engineer. Agent-generated incident summaries are sent to stakeholders without review.
 
@@ -319,7 +317,7 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 
 #### Level 4 -- Optimized
 - **Required practices**:
-  - Agents can execute pre-approved remediation actions (restart a service, scale up capacity, toggle a feature flag) through a controlled interface with approval and audit.
+  - Agents can execute pre-approved remediation actions (restart a service, scale up a target group, toggle a feature flag) through a controlled interface with approval and audit.
   - Agent remediation actions are constrained to a pre-approved list; anything outside the list requires human execution.
   - Incident response metrics track agent contribution: time-to-detection, time-to-mitigation, accuracy of root cause suggestions.
 - **Required artifacts**:
@@ -350,23 +348,23 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 
 #### Level 1 -- Exploratory
 - **Required practices**: Security team is aware that developers use AI agents. Informal guidance exists about not pasting secrets or PII into prompts.
-- **Required artifacts**: Informal guidance (chat message, wiki note).
+- **Required artifacts**: Informal guidance (Slack message, wiki note).
 - **Anti-patterns**: Guidance is informal and inconsistent. No technical controls prevent data leakage to AI endpoints.
 
 #### Level 2 -- Defined
 - **Required practices**:
   - Acceptable use policy for AI agents is published (see `templates/policy-ai-agent-usage.md`).
   - Data classification rules define what can and cannot be sent to AI agent endpoints (e.g., no PII, no secrets, no classified data).
-  - For regulated environments: AI agent traffic does not leave approved network boundaries (authorized endpoints only, or self-hosted models).
-  - Secrets scanning runs on all agent-generated code before merge (e.g., gitleaks, truffleHog, GitLab Secret Detection, or platform-native scanning).
+  - For Federal environments: AI agent traffic does not leave approved network boundaries (FedRAMP-authorized endpoints only, or self-hosted models).
+  - Secrets scanning runs on all agent-generated code before merge (e.g., GitHub Advanced Security, gitleaks, or truffleHog).
   - Agent API keys are managed centrally, not by individual developers.
 - **Required artifacts**:
   - AI agent acceptable use policy.
   - Data classification matrix for AI agent usage.
-  - Regulated environment network boundary documentation.
+  - Federal-specific network boundary documentation.
   - Secrets scanning configuration.
-  - Centralized API key management (secrets management service such as HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager, or similar).
-- **Anti-patterns**: Policy exists but is not enforced technically. Regulated and standard environments use the same AI endpoints. Developers use personal API keys.
+  - Centralized API key management (AWS Secrets Manager, HashiCorp Vault, or Artifactory-managed tokens).
+- **Anti-patterns**: Policy exists but is not enforced technically. Federal and commercial environments use the same AI endpoints. Developers use personal API keys.
 
 #### Level 3 -- Managed
 - **Required practices**:
@@ -375,22 +373,22 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
   - Regular (quarterly) review of agent usage logs for policy violations.
   - Supply chain security: agent-suggested dependencies are checked against an approved list or scanned for vulnerabilities before merge.
 - **Required artifacts**:
-  - API gateway or proxy with logging.
-  - Audit log pipeline to your monitoring/SIEM system.
+  - API gateway or proxy with logging (e.g., AWS API Gateway, custom proxy).
+  - Audit log pipeline to CloudWatch/SIEM.
   - Quarterly review process documentation and findings.
-  - Dependency allow-list or vulnerability scanning integration (e.g., Dependabot, Snyk, Artifactory Xray, Mend, or similar).
+  - Dependency allow-list or vulnerability scanning integration (Artifactory Xray, Dependabot, Snyk).
 - **Anti-patterns**: Logging captures prompts containing sensitive data without redaction. Audit reviews are performed but findings are not remediated. Dependency scanning exists but agents suggest adding `--force` to bypass it.
 
 #### Level 4 -- Optimized
 - **Required practices**:
   - DLP (data loss prevention) controls actively prevent sensitive data from reaching AI agent endpoints.
-  - Compliance checks are automated: agent-generated code is scanned for violations of applicable regulatory controls.
-  - Agent access is governed by least-privilege roles scoped to specific repos, actions, and environments.
+  - Compliance checks are automated: agent-generated code is scanned for NIST 800-53 control violations (for Federal) and SOC2/ISO27001 relevant controls (for commercial).
+  - Agent access is governed by least-privilege IAM roles scoped to specific repos, actions, and environments.
   - Exception process exists for cases where agents need access to restricted data or systems, with documented approval and time-bound access.
 - **Required artifacts**:
   - DLP integration configuration.
   - Automated compliance scanning pipeline.
-  - Access role definitions for agent access (per-repo or per-team).
+  - IAM role definitions for agent access (per-repo or per-team).
   - Exception request template and approval log.
 - **Anti-patterns**: DLP blocks legitimate agent usage with too many false positives. Compliance scanning produces reports nobody reads. Exception process is so burdensome that teams bypass it.
 
@@ -421,14 +419,14 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 
 #### Level 2 -- Defined
 - **Required practices**:
-  - Every repo has project-level agent instructions (e.g., CLAUDE.md or equivalent) that describe the project, conventions, architecture, and key decisions.
+  - Every repo has a CLAUDE.md (or equivalent) that describes the project, conventions, architecture, and key decisions.
   - ADRs (Architecture Decision Records) are maintained and agents are instructed to reference them.
   - Agents are explicitly told where documentation lives and how to reference it.
 - **Required artifacts**:
-  - Agent instructions per repo (or monorepo section).
+  - CLAUDE.md per repo (or monorepo section).
   - ADR directory with numbered records.
   - Agent context configuration pointing to docs.
-- **Anti-patterns**: Agent instruction files are boilerplate copied between repos. ADRs exist but are never updated. Agents are given too much context (entire repo) instead of curated documents.
+- **Anti-patterns**: CLAUDE.md files are boilerplate copied between repos. ADRs exist but are never updated. Agents are given too much context (entire repo) instead of curated documents.
 
 #### Level 3 -- Managed
 - **Required practices**:
@@ -474,7 +472,7 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
 
 #### Level 1 -- Exploratory
 - **Required practices**: At least one person or team is informally tracking AI agent usage and interest across the org.
-- **Required artifacts**: Informal tracking (spreadsheet, chat channel).
+- **Required artifacts**: Informal tracking (spreadsheet, Slack channel).
 - **Anti-patterns**: Multiple teams evaluate agents independently with no coordination. Shadow IT risk.
 
 #### Level 2 -- Defined
@@ -482,12 +480,12 @@ This model is designed to be platform-agnostic. Adapt it to your organization's 
   - An AI agent governance body exists (can be a working group, not necessarily a committee).
   - The governance body maintains the approved tools list, acceptable use policy, and exception process.
   - Agent usage decisions (new tools, expanded access, policy changes) go through a documented process.
-  - Regulated-environment-specific governance requirements are documented and enforced separately.
+  - Federal-specific governance requirements are documented and enforced separately.
 - **Required artifacts**:
   - Governance body charter or working group terms of reference.
   - Decision log for agent-related decisions.
-  - Regulated environment governance addendum.
-- **Anti-patterns**: Governance body exists but has no authority. Decisions are made but not communicated. Regulated and standard governance are identical despite different requirements.
+  - Federal governance addendum.
+- **Anti-patterns**: Governance body exists but has no authority. Decisions are made but not communicated. Federal and commercial governance are identical despite different requirements.
 
 #### Level 3 -- Managed
 - **Required practices**:
@@ -612,14 +610,14 @@ These categories of change, when generated or proposed by an AI agent, **must** 
 
 | # | Category | Why It Is High Risk | Required Review |
 |---|----------|-------------------|----------------|
-| 1 | Identity and access policy changes | Overly permissive policies can expose entire cloud accounts or subscriptions | Security team + infrastructure team |
-| 2 | Network security changes | Security group, firewall rule, or network ACL changes can expose internal services | Security team |
+| 1 | IAM policy changes | Overly permissive policies can expose entire AWS accounts | Security team + infrastructure team |
+| 2 | Network security changes | Security group, NACL, or VPC changes can expose internal services | Security team |
 | 3 | Database schema migrations | Data loss, corruption, or performance degradation risk | DBA or data team + application team |
 | 4 | CI/CD pipeline modifications | Compromised pipelines can deploy malicious code or leak secrets | Platform team |
 | 5 | Secrets or credential handling | Hardcoded secrets, weak encryption, or improper key management | Security team |
 | 6 | Authentication/authorization logic | Broken auth is a top vulnerability category (OWASP) | Security team + application team |
-| 7 | Production infrastructure changes | IaC changes to production environments can cause outages | Infrastructure team + change advisory |
-| 8 | Regulated environment changes | Compliance violations (FedRAMP, HIPAA, PCI-DSS, GDPR, etc.) can have legal consequences | Compliance team + security team |
+| 7 | Production infrastructure changes | Terraform changes to production workspaces can cause outages | Infrastructure team + change advisory |
+| 8 | Federal environment changes | FedRAMP/FISMA compliance violations can have legal consequences | Compliance team + security team |
 | 9 | Dependency additions or major version upgrades | Supply chain risk, breaking changes, license compliance | Application team lead |
 | 10 | Data pipeline or ETL changes | Data integrity, PII exposure, compliance implications | Data team + compliance |
 
@@ -633,19 +631,19 @@ These categories of change, when generated or proposed by an AI agent, **must** 
 
 ### Failure Condition 2: Checkbox Compliance
 **Description**: The org creates policies and checklists but does not enforce them technically. Compliance is aspirational.
-**Mitigation**: Enforce policies through automation (code ownership rules, CI gates, API gateways, DLP). Audit regularly and act on findings.
+**Mitigation**: Enforce policies through automation (CODEOWNERS, CI gates, API gateways, DLP). Audit regularly and act on findings.
 
 ### Failure Condition 3: Agent-Generated Technical Debt
 **Description**: Agents produce code that works but is poorly structured, over-abstracted, or inconsistent with org conventions, creating long-term maintenance burden.
-**Mitigation**: Provide agents with strong project context (agent instruction files, style guides, approved patterns). Measure rework rate. Train reviewers to catch agent-specific code smells.
+**Mitigation**: Provide agents with strong project context (CLAUDE.md, style guides, approved patterns). Measure rework rate. Train reviewers to catch agent-specific code smells.
 
 ### Failure Condition 4: Review Theater
 **Description**: Agent-generated PRs receive perfunctory reviews because reviewers assume the agent "knows what it is doing" or because the diff is too large to review carefully.
 **Mitigation**: Enforce maximum PR size. Auto-label agent PRs. Provide reviewer training specific to agent-generated code. Track review depth metrics.
 
-### Failure Condition 5: Security Blind Spots in Regulated Environments
-**Description**: AI agent usage violates regulatory requirements because the org treats regulated environments the same as standard ones.
-**Mitigation**: Maintain separate policies, network boundaries, and approved tool lists for regulated environments. Involve compliance early in agent adoption decisions.
+### Failure Condition 5: Security Blind Spots in Federal Environments
+**Description**: AI agent usage violates FedRAMP or FISMA requirements because the org treats Federal environments the same as commercial.
+**Mitigation**: Maintain separate policies, network boundaries, and approved tool lists for Federal environments. Involve compliance early in agent adoption decisions.
 
 ### Failure Condition 6: Cost Surprise
 **Description**: Agent API costs grow faster than expected because usage is not metered or allocated.
@@ -661,7 +659,7 @@ These categories of change, when generated or proposed by an AI agent, **must** 
 
 ### Failure Condition 9: Vendor Lock-in
 **Description**: The org builds critical workflows around a single agent vendor's proprietary features, making switching costly.
-**Mitigation**: Use vendor-neutral configurations where possible. Abstract agent interactions behind internal interfaces. Evaluate multiple vendors periodically.
+**Mitigation**: Use vendor-neutral configurations where possible (CLAUDE.md conventions work across tools). Abstract agent interactions behind internal interfaces. Evaluate multiple vendors periodically.
 
 ### Failure Condition 10: Metrics Without Action
 **Description**: The org collects extensive metrics on agent usage but never uses them to make decisions.
@@ -674,15 +672,15 @@ These categories of change, when generated or proposed by an AI agent, **must** 
 | # | Anti-Pattern | Domain(s) | Mitigation |
 |---|-------------|-----------|-----------|
 | 1 | Rubber-stamping agent PRs | PR/Review | Enforce review depth; auto-label agent PRs; limit PR size |
-| 2 | Wildcard IAM/RBAC in agent-generated IaC | IaC, Security | Policy-as-code blocks wildcard policies; agent instructions prohibit them explicitly |
-| 3 | Agents with production credentials | Ops, Security | Least-privilege roles; read-only for ops; pre-approved action lists |
+| 2 | Wildcard IAM in agent-generated Terraform | IaC, Security | Policy-as-code blocks wildcard policies; CLAUDE.md prohibits them explicitly |
+| 3 | Agents with production credentials | Ops, Security | Least-privilege IAM roles; read-only for ops; pre-approved action lists |
 | 4 | Personal API keys for agents | Security, Governance | Centralized key management; block personal key usage via network controls |
-| 5 | Ignoring regulated/standard environment boundary | Security, IaC, Governance | Separate policies, tooling, and network paths for regulated environments |
+| 5 | Ignoring Federal/commercial boundary | Security, IaC, Governance | Separate policies, tooling, and network paths for Federal |
 | 6 | Agent-generated docs accepted without review | Knowledge | Review workflow for agent docs; hallucination checks |
-| 7 | Bespoke CI pipelines per repo | CI/CD | Reusable pipeline component library; agents instructed to use shared components |
+| 7 | Bespoke CI pipelines per repo | CI/CD | Reusable actions library; agents instructed to use shared components |
 | 8 | Measuring agent adoption without quality | Evaluation | Track defect rate and rework rate alongside adoption rate |
 | 9 | Governance without enforcement | Governance | Policy-as-code; automated compliance checks; regular audits |
-| 10 | Context overload (sending entire repos to agents) | Dev Workflow, Knowledge | Curated context files; agent instructions; RAG with relevance filtering |
+| 10 | Context overload (sending entire repos to agents) | Dev Workflow, Knowledge | Curated context files; CLAUDE.md; RAG with relevance filtering |
 | 11 | Treating all agent output as equal quality | PR/Review, Evaluation | Segment metrics by agent vs. human; calibrate review rigor by risk |
 | 12 | No rollback plan for agent-generated changes | CI/CD, IaC, Ops | Standard rollback procedures apply; tag agent-generated changes for easy identification |
 
@@ -701,4 +699,4 @@ Agent-generated work (code, IaC, documentation, configuration) is considered "do
 7. **Context documented**: The PR description includes what the agent was asked to do, what it changed, and any limitations or follow-up items.
 8. **Labeled**: The PR or commit is labeled or tagged as agent-generated or agent-assisted.
 9. **No high-risk changes unaddressed**: If the change touches a high-risk category, the required additional reviewers have approved.
-10. **Regulatory compliance verified** (if applicable): Changes to regulated environment resources have been verified against applicable compliance controls.
+10. **Federal compliance verified** (if applicable): Changes to Federal environment resources have been verified against NIST 800-53 controls.

@@ -22,19 +22,19 @@ Agents provide suggestions, analysis, and drafts. They do not execute actions on
 By default, agents used during ops and incident response have **read-only** access to production systems.
 
 **Permitted read-only actions**:
-- Search application and infrastructure logs (e.g., via your cloud monitoring service, log aggregator, or APM tool)
-- Query metrics and dashboards
-- Read service/container/instance status
-- Read load balancer or gateway health
+- Search CloudWatch Logs
+- Query CloudWatch Metrics
+- Read ECS service/task status
+- Read load balancer target health
 - Search past incident records
 - Read application configuration (non-secrets)
-- Read IaC state (read-only backend)
+- Read Terraform state (read-only backend)
 
 **Prohibited without Controlled Write Mode**:
 - Restart, stop, or scale any service
 - Modify any configuration
 - Deploy any code
-- Change any IAM/RBAC role, firewall rule, or network configuration
+- Change any IAM role, security group, or network configuration
 - Toggle any feature flag
 - Run any database query (even SELECT, unless explicitly approved for the incident)
 - Access or read any secrets
@@ -44,14 +44,14 @@ By default, agents used during ops and incident response have **read-only** acce
 ## Rule 3: No Production Credentials for Agents
 
 Agents must never receive:
-- Production cloud access keys or session tokens (beyond the scoped read-only role)
+- Production AWS access keys or session tokens (beyond the scoped read-only role)
 - Database connection strings or credentials
 - API keys for production third-party services
 - SSH keys to production instances
-- Container exec or shell access to production workloads
+- Kubernetes/ECS exec access (even if Kubernetes is adopted later)
 
 **How credentials are managed**:
-- Agents use a dedicated access role with read-only permissions, assumed via role chaining or equivalent mechanism.
+- Agents use a dedicated IAM role with read-only permissions, assumed via role chaining.
 - The role is scoped to specific log groups, metric namespaces, and services relevant to the incident.
 - The role has a session duration limit (1 hour maximum, renewable by the IC).
 
@@ -74,7 +74,7 @@ If there is no designated IC, agent usage defaults to read-only log search only.
 ## Rule 5: All Agent Actions Are Logged
 
 Every agent interaction during an incident must be logged to:
-1. The incident communication channel (e.g., Slack, Teams, or equivalent).
+1. The incident Slack channel (or equivalent communication channel).
 2. The incident audit trail (ticketing system or dedicated log).
 
 **What to log**:
@@ -102,26 +102,26 @@ At maturity Level 4 and above, agents may execute a limited set of pre-approved 
 ### Prerequisites for Controlled Write Mode
 - The organization has reached Level 4 in the Ops and Incident Response domain.
 - The pre-approved action list has been reviewed and signed off by the SRE lead and security team.
-- The agent has a dedicated access role for write actions, separate from the read-only role.
+- The agent has a dedicated IAM role for write actions, separate from the read-only role.
 - Audit logging for write actions is verified and operational.
 
-### Pre-Approved Action List (Example -- Customize for Your Organization)
+### Pre-Approved Action List (Example -- Customize for Your Org)
 
 | Action | Parameters | Limits | Required Approver |
 |--------|-----------|--------|------------------|
-| Restart service | Service/deployment identifier | One service at a time | IC |
-| Scale service capacity | Service identifier, desired count | Max 2x current count | IC |
+| Restart ECS service | Cluster, service name | One service at a time | IC |
+| Scale ECS service task count | Cluster, service name, desired count | Max 2x current count | IC |
 | Toggle feature flag | Flag name | Only flags on the approved list | IC |
 | Create incident ticket | Title, description, severity | No limit | IC |
-| Post to incident channel | Message text | No limit | IC |
-| Roll back to previous deployment | Service identifier | One revision back only | IC + SRE lead |
+| Post to incident Slack channel | Message text | No limit | IC |
+| Roll back to previous ECS task definition | Cluster, service name | One revision back only | IC + SRE lead |
 
 ### Actions NOT Permitted in Controlled Write Mode
-- Any IAM/RBAC or security policy change
+- Any IAM or security group change
 - Any database write or schema change
-- Any IaC apply
+- Any Terraform apply
 - Any deployment of new code
-- Any change to networking (VPC, firewall rules, route tables)
+- Any change to networking (VPC, route tables, NACLs)
 - Any action not on the pre-approved list
 
 ### Approval Flow for Controlled Write Mode
@@ -136,14 +136,14 @@ If the action fails, the agent reports the failure and does not retry without a 
 
 ---
 
-## Rule 7: Regulated Environment Restrictions
+## Rule 7: Federal Environment Restrictions
 
-For incidents affecting regulated environments (e.g., FedRAMP, HIPAA, PCI-DSS, GDPR-scoped systems):
-- Agents are restricted to **read-only mode only** until a compliance assessment explicitly authorizes Controlled Write Mode for agent-assisted remediation.
-- All agent interactions during regulated-environment incidents must be logged to the appropriate audit trail.
-- Agent API calls must route through approved endpoints only.
-- No incident data from regulated environments may be sent to unapproved AI endpoints.
-- The IC must verify that the agent is operating within the correct network boundary before engagement.
+For incidents affecting Federal environments:
+- Agents are restricted to **read-only mode only** until a FedRAMP assessment explicitly authorizes Controlled Write Mode for agent-assisted remediation.
+- All agent interactions during Federal incidents must be logged to the GovCloud audit trail.
+- Agent API calls must route through GovCloud endpoints only.
+- No incident data from Federal environments may be sent to commercial AI endpoints.
+- The IC must verify that the agent is operating in Federal mode before engagement.
 
 ---
 
@@ -197,6 +197,6 @@ AI AGENT INCIDENT RULES - QUICK REFERENCE
 4. Log every agent interaction to the incident channel.
 5. Verify agent output before acting on it.
 6. Controlled Write Mode (Level 4+): pre-approved actions only, IC approval required.
-7. Regulated-environment incidents: read-only only. Approved endpoints only.
+7. Federal incidents: read-only only. GovCloud endpoints only.
 8. Disengage if agent is wrong twice, incident is security-related, or agent slows you down.
 ```
