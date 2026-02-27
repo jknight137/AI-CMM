@@ -1,804 +1,1085 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Agent CMM -- Anti-Pattern and Risk Checker</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agent CMM -- Anti-Pattern and Risk Checker</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-:root {
-  --color-bg: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-border: #dee2e6;
-  --color-text: #212529;
-  --color-text-muted: #6c757d;
-  --color-primary: #2563eb;
-  --color-primary-light: #dbeafe;
-  --color-red: #dc2626;
-  --color-red-light: #fef2f2;
-  --color-yellow: #d97706;
-  --color-yellow-light: #fffbeb;
-  --color-green: #16a34a;
-  --color-green-light: #f0fdf4;
-  --radius: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
-}
+      :root {
+        --color-bg: #f8f9fa;
+        --color-surface: #ffffff;
+        --color-border: #dee2e6;
+        --color-text: #212529;
+        --color-text-muted: #6c757d;
+        --color-primary: #2563eb;
+        --color-primary-light: #dbeafe;
+        --color-red: #dc2626;
+        --color-red-light: #fef2f2;
+        --color-yellow: #d97706;
+        --color-yellow-light: #fffbeb;
+        --color-green: #16a34a;
+        --color-green-light: #f0fdf4;
+        --radius: 8px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-lg:
+          0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+      }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.6;
-}
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+      }
 
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px 20px;
-}
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
 
-.header {
-  text-align: center;
-  padding: 16px 0 8px;
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 24px;
-}
-.header h1 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  letter-spacing: 0.02em;
-}
+      .header {
+        text-align: center;
+        padding: 16px 0 8px;
+        border-bottom: 1px solid var(--color-border);
+        margin-bottom: 24px;
+      }
+      .header h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        letter-spacing: 0.02em;
+      }
 
-.screen { display: none; }
-.screen.active { display: block; }
+      .screen {
+        display: none;
+      }
+      .screen.active {
+        display: block;
+      }
 
-/* --- Intro card --- */
-.intro-card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 40px;
-  text-align: center;
-  max-width: 680px;
-  margin: 32px auto;
-}
-.intro-card h2 {
-  font-size: 1.5rem;
-  margin-bottom: 12px;
-}
-.intro-card p {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-}
+      /* --- Intro card --- */
+      .intro-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        padding: 40px;
+        text-align: center;
+        max-width: 680px;
+        margin: 32px auto;
+      }
+      .intro-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+      }
+      .intro-card p {
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+      }
 
-/* --- Buttons --- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 22px;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-}
-.btn-primary { background: var(--color-primary); color: #fff; }
-.btn-primary:hover { background: #1d4ed8; }
-.btn-secondary { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); }
-.btn-secondary:hover { background: var(--color-bg); }
-.btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+      /* --- Buttons --- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #1d4ed8;
+      }
+      .btn-secondary {
+        background: var(--color-surface);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+      }
+      .btn-secondary:hover {
+        background: var(--color-bg);
+      }
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
 
-/* --- Checklist section --- */
-.section-card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 28px 32px;
-  margin-bottom: 20px;
-}
-.section-card h2 {
-  font-size: 1.15rem;
-  margin-bottom: 6px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
-}
-.section-card > p {
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-  margin-bottom: 16px;
-}
+      /* --- Checklist section --- */
+      .section-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px 32px;
+        margin-bottom: 20px;
+      }
+      .section-card h2 {
+        font-size: 1.15rem;
+        margin-bottom: 6px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .section-card > p {
+        font-size: 0.88rem;
+        color: var(--color-text-muted);
+        margin-bottom: 16px;
+      }
 
-/* --- Checklist items --- */
-.check-item {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  padding: 14px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  background: var(--color-surface);
-}
-.check-item:hover {
-  border-color: var(--color-primary);
-}
-.check-item.checked {
-  background: var(--color-red-light);
-  border-color: var(--color-red);
-}
-.check-item input[type="checkbox"] {
-  margin-top: 3px;
-  flex-shrink: 0;
-  accent-color: var(--color-red);
-  width: 16px;
-  height: 16px;
-}
-.check-item .item-body {
-  flex: 1;
-}
-.check-item .item-title {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 2px;
-}
-.check-item .item-desc {
-  font-size: 0.83rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-.check-item .item-domains {
-  margin-top: 4px;
-}
-.domain-tag {
-  display: inline-block;
-  padding: 1px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: var(--color-bg);
-  color: var(--color-text-muted);
-  margin-right: 4px;
-  margin-top: 2px;
-}
-.mitigation-text {
-  display: none;
-  margin-top: 8px;
-  padding: 10px 14px;
-  background: var(--color-primary-light);
-  border-radius: 6px;
-  font-size: 0.83rem;
-  color: var(--color-text);
-  line-height: 1.5;
-}
-.check-item.checked .mitigation-text {
-  display: block;
-}
-.mitigation-label {
-  font-weight: 700;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-primary);
-  margin-bottom: 2px;
-}
+      /* --- Checklist items --- */
+      .check-item {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 14px 16px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        background: var(--color-surface);
+      }
+      .check-item:hover {
+        border-color: var(--color-primary);
+      }
+      .check-item.checked {
+        background: var(--color-red-light);
+        border-color: var(--color-red);
+      }
+      .check-item input[type="checkbox"] {
+        margin-top: 3px;
+        flex-shrink: 0;
+        accent-color: var(--color-red);
+        width: 16px;
+        height: 16px;
+      }
+      .check-item .item-body {
+        flex: 1;
+      }
+      .check-item .item-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+      }
+      .check-item .item-desc {
+        font-size: 0.83rem;
+        color: var(--color-text-muted);
+        line-height: 1.5;
+      }
+      .check-item .item-domains {
+        margin-top: 4px;
+      }
+      .domain-tag {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: var(--color-bg);
+        color: var(--color-text-muted);
+        margin-right: 4px;
+        margin-top: 2px;
+      }
+      .mitigation-text {
+        display: none;
+        margin-top: 8px;
+        padding: 10px 14px;
+        background: var(--color-primary-light);
+        border-radius: 6px;
+        font-size: 0.83rem;
+        color: var(--color-text);
+        line-height: 1.5;
+      }
+      .check-item.checked .mitigation-text {
+        display: block;
+      }
+      .mitigation-label {
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-primary);
+        margin-bottom: 2px;
+      }
 
-/* --- Progress / score bar --- */
-.score-bar {
-  position: sticky;
-  top: 0;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  padding: 12px 0;
-  margin-bottom: 20px;
-  z-index: 100;
-  display: none;
-}
-.score-bar.visible { display: block; }
-.score-bar-inner {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.score-summary {
-  font-size: 0.9rem;
-}
-.score-summary strong {
-  font-size: 1.1rem;
-}
-.risk-level {
-  padding: 4px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
-}
-.risk-low { background: var(--color-green); }
-.risk-medium { background: var(--color-yellow); color: #92400e; }
-.risk-high { background: var(--color-red); }
+      /* --- Progress / score bar --- */
+      .score-bar {
+        position: sticky;
+        top: 0;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+        padding: 12px 0;
+        margin-bottom: 20px;
+        z-index: 100;
+        display: none;
+      }
+      .score-bar.visible {
+        display: block;
+      }
+      .score-bar-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .score-summary {
+        font-size: 0.9rem;
+      }
+      .score-summary strong {
+        font-size: 1.1rem;
+      }
+      .risk-level {
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+      }
+      .risk-low {
+        background: var(--color-green);
+      }
+      .risk-medium {
+        background: var(--color-yellow);
+        color: #92400e;
+      }
+      .risk-high {
+        background: var(--color-red);
+      }
 
-/* --- Results --- */
-.results-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.result-card {
-  padding: 20px;
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-}
-.result-card .result-value {
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.result-card .result-label {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-}
+      /* --- Results --- */
+      .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .result-card {
+        padding: 20px;
+        border-radius: var(--radius);
+        border: 1px solid var(--color-border);
+      }
+      .result-card .result-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .result-card .result-label {
+        font-size: 0.82rem;
+        color: var(--color-text-muted);
+      }
 
-.recommendation-item {
-  padding: 14px 16px;
-  border-left: 4px solid var(--color-primary);
-  background: var(--color-primary-light);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  margin-bottom: 8px;
-  font-size: 0.88rem;
-}
-.recommendation-item strong {
-  display: block;
-  margin-bottom: 2px;
-}
+      .recommendation-item {
+        padding: 14px 16px;
+        border-left: 4px solid var(--color-primary);
+        background: var(--color-primary-light);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        margin-bottom: 8px;
+        font-size: 0.88rem;
+      }
+      .recommendation-item strong {
+        display: block;
+        margin-bottom: 2px;
+      }
 
-.export-bar {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 16px 0;
-}
+      .export-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 16px 0;
+      }
 
-.toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #1e293b;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(80px);
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 1000;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #1e293b;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
 
-/* --- Responsive --- */
-@media (max-width: 640px) {
-  .container { padding: 16px 12px; }
-  .intro-card { padding: 28px 20px; }
-  .section-card { padding: 20px 16px; }
-  .results-grid { grid-template-columns: 1fr; }
-  .export-bar { flex-direction: column; }
-  .score-bar-inner { flex-direction: column; gap: 6px; }
-}
+      /* --- Responsive --- */
+      @media (max-width: 640px) {
+        .container {
+          padding: 16px 12px;
+        }
+        .intro-card {
+          padding: 28px 20px;
+        }
+        .section-card {
+          padding: 20px 16px;
+        }
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+        .export-bar {
+          flex-direction: column;
+        }
+        .score-bar-inner {
+          flex-direction: column;
+          gap: 6px;
+        }
+      }
 
-/* --- Print --- */
-@media print {
-  body { background: #fff; }
-  .score-bar, .btn, .export-bar { display: none !important; }
-  .screen { display: none !important; }
-  #results-screen { display: block !important; }
-  .section-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
-}
-</style>
-</head>
-<body>
+      /* --- Print --- */
+      @media print {
+        body {
+          background: #fff;
+        }
+        .score-bar,
+        .btn,
+        .export-bar {
+          display: none !important;
+        }
+        .screen {
+          display: none !important;
+        }
+        #results-screen {
+          display: block !important;
+        }
+        .section-card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          break-inside: avoid;
+        }
+      }
+      .site-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--color-border);
+        padding: 8px 20px;
+        font-size: 0.82rem;
+        position: relative;
+        z-index: 200;
+      }
+      .site-nav a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .site-nav a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site-nav"><a href="../">&larr; AI-CMM Home</a></nav>
 
-<div class="score-bar" id="score-bar">
-  <div class="score-bar-inner">
-    <div class="score-summary"><strong id="bar-count">0</strong> of 22 risks identified</div>
-    <div><span class="risk-level" id="bar-risk">Low Risk</span></div>
-  </div>
-</div>
-
-<div class="container">
-  <div class="header">
-    <h1>AI Agent CMM -- Anti-Pattern and Risk Checker</h1>
-  </div>
-
-  <!-- INTRO -->
-  <div id="intro-screen" class="screen active">
-    <div class="intro-card">
-      <h2>Risk and Anti-Pattern Checker</h2>
-      <p>A quick diagnostic to identify common pitfalls in AI agent adoption. Check each anti-pattern or failure condition that applies to your organization, and get targeted mitigation recommendations.</p>
-      <p style="font-size:0.85rem">Based on 12 anti-patterns and 10 failure conditions from the AI Agent Capability Maturity Model. Takes about 5 minutes.</p>
-      <br>
-      <button class="btn btn-primary" onclick="startCheck()">Start Checker</button>
+    <div class="score-bar" id="score-bar">
+      <div class="score-bar-inner">
+        <div class="score-summary">
+          <strong id="bar-count">0</strong> of 22 risks identified
+        </div>
+        <div><span class="risk-level" id="bar-risk">Low Risk</span></div>
+      </div>
     </div>
-  </div>
 
-  <!-- CHECKLIST -->
-  <div id="check-screen" class="screen">
-    <div class="section-card">
-      <h2>Anti-Patterns</h2>
-      <p>Check each anti-pattern that currently applies to your organization. When checked, a mitigation recommendation will appear.</p>
-      <div id="anti-patterns-list"></div>
+    <div class="container">
+      <div class="header">
+        <h1>AI Agent CMM -- Anti-Pattern and Risk Checker</h1>
+      </div>
+
+      <!-- INTRO -->
+      <div id="intro-screen" class="screen active">
+        <div class="intro-card">
+          <h2>Risk and Anti-Pattern Checker</h2>
+          <p>
+            A quick diagnostic to identify common pitfalls in AI agent adoption.
+            Check each anti-pattern or failure condition that applies to your
+            organization, and get targeted mitigation recommendations.
+          </p>
+          <p style="font-size: 0.85rem">
+            Based on 12 anti-patterns and 10 failure conditions from the AI
+            Agent Capability Maturity Model. Takes about 5 minutes.
+          </p>
+          <br />
+          <button class="btn btn-primary" onclick="startCheck()">
+            Start Checker
+          </button>
+        </div>
+      </div>
+
+      <!-- CHECKLIST -->
+      <div id="check-screen" class="screen">
+        <div class="section-card">
+          <h2>Anti-Patterns</h2>
+          <p>
+            Check each anti-pattern that currently applies to your organization.
+            When checked, a mitigation recommendation will appear.
+          </p>
+          <div id="anti-patterns-list"></div>
+        </div>
+
+        <div class="section-card">
+          <h2>Failure Conditions</h2>
+          <p>
+            Check each failure condition that you believe is present or at risk
+            of occurring in your organization.
+          </p>
+          <div id="failures-list"></div>
+        </div>
+
+        <div style="text-align: center; padding: 16px 0">
+          <button class="btn btn-primary" onclick="showResults()">
+            View Results
+          </button>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="results-screen" class="screen">
+        <div class="section-card">
+          <h2>Risk Assessment Summary</h2>
+          <div class="results-grid" id="results-summary"></div>
+        </div>
+
+        <div class="section-card" id="recs-section" style="display: none">
+          <h2>Priority Recommendations</h2>
+          <div id="recs-list"></div>
+        </div>
+
+        <div
+          class="section-card"
+          id="checked-detail-section"
+          style="display: none"
+        >
+          <h2>Identified Risks -- Detail</h2>
+          <div id="checked-detail-list"></div>
+        </div>
+
+        <div class="section-card" id="clean-section" style="display: none">
+          <h2>Areas Without Identified Risks</h2>
+          <p
+            style="
+              font-size: 0.88rem;
+              color: var(--color-text-muted);
+              margin-bottom: 12px;
+            "
+          >
+            These anti-patterns and failure conditions were not identified in
+            your organization.
+          </p>
+          <div id="clean-list"></div>
+        </div>
+
+        <div class="export-bar">
+          <button class="btn btn-secondary btn-sm" onclick="exportMarkdown()">
+            Download as Markdown
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="copyToClipboard()">
+            Copy to Clipboard
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">
+            Print / PDF
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="restart()">
+            Start Over
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="section-card">
-      <h2>Failure Conditions</h2>
-      <p>Check each failure condition that you believe is present or at risk of occurring in your organization.</p>
-      <div id="failures-list"></div>
-    </div>
+    <div class="toast" id="toast"></div>
 
-    <div style="text-align:center;padding:16px 0">
-      <button class="btn btn-primary" onclick="showResults()">View Results</button>
-    </div>
-  </div>
+    <script>
+      var ANTI_PATTERNS = [
+        {
+          id: "ap1",
+          title: "Rubber-stamping agent PRs",
+          description:
+            'Agent-generated PRs receive perfunctory reviews because reviewers assume the agent "knows what it is doing" or because the diff is too large to review carefully.',
+          domains: ["PR/Review"],
+          mitigation:
+            "Enforce review depth metrics. Auto-label agent PRs so reviewers know to apply extra scrutiny. Limit maximum PR size. Provide reviewer training specific to agent-generated code patterns (over-abstraction, hallucinated imports, incorrect error handling).",
+        },
+        {
+          id: "ap2",
+          title: "Wildcard IAM/RBAC in agent-generated IaC",
+          description:
+            'Agents generate identity and access policies with wildcard actions or resources (e.g., "Action": "*"), creating overly permissive access.',
+          domains: ["IaC", "Security"],
+          mitigation:
+            "Implement policy-as-code (OPA, Sentinel) that blocks wildcard policies in CI. Add explicit prohibitions to agent instruction files. Run linters (checkov, tfsec) pre-merge with wildcard detection rules.",
+        },
+        {
+          id: "ap3",
+          title: "Agents with production credentials",
+          description:
+            "Agents have the same access as the engineers using them, including write access to production systems.",
+          domains: ["Ops", "Security"],
+          mitigation:
+            "Implement least-privilege roles for agents. Ops access should be read-only. Pre-approved remediation action lists constrain what agents can do. Separate agent credentials from human credentials.",
+        },
+        {
+          id: "ap4",
+          title: "Personal API keys for agents",
+          description:
+            "Developers use personal API keys for AI agent services. No centralized key management, no visibility into usage, no cost control.",
+          domains: ["Security", "Governance"],
+          mitigation:
+            "Deploy centralized API key management (Vault, AWS Secrets Manager, or similar). Route agent API traffic through an org-managed proxy. Block direct API access via network controls. Allocate costs to teams.",
+        },
+        {
+          id: "ap5",
+          title: "Ignoring regulated/standard environment boundary",
+          description:
+            "Regulated environments (FedRAMP, HIPAA, PCI-DSS, GDPR) use the same AI agent endpoints, policies, and tooling as standard environments.",
+          domains: ["Security", "IaC", "Governance"],
+          mitigation:
+            "Maintain separate policies, network boundaries, and approved tool lists for regulated environments. Use self-hosted models or authorized endpoints for regulated data. Assess regulated environments separately.",
+        },
+        {
+          id: "ap6",
+          title: "Agent-generated docs accepted without review",
+          description:
+            "Agents generate or update documentation and it is merged without human review, potentially containing hallucinated content.",
+          domains: ["Knowledge"],
+          mitigation:
+            "Establish a review workflow for all agent-generated documentation. Implement hallucination checks (verify referenced APIs, imports, and configurations exist). Require human editorial approval before merge.",
+        },
+        {
+          id: "ap7",
+          title: "Bespoke CI pipelines per repo",
+          description:
+            "Every repository has custom pipeline logic. No reusable components. Agents generate new bespoke pipelines each time.",
+          domains: ["CI/CD"],
+          mitigation:
+            "Build a reusable pipeline component library. Instruct agents to use shared components. Standardize pipeline structure through documentation and templates. Enforce via code ownership on pipeline config directories.",
+        },
+        {
+          id: "ap8",
+          title: "Measuring adoption without quality",
+          description:
+            "The organization tracks agent adoption rate but not the quality of agent-generated output. High adoption masks increasing defect rates or technical debt.",
+          domains: ["Evaluation"],
+          mitigation:
+            "Track defect rate, rework rate, and security finding rate for agent-generated code alongside adoption metrics. Segment PR metrics by origin. Measure code quality, not just velocity.",
+        },
+        {
+          id: "ap9",
+          title: "Governance without enforcement",
+          description:
+            "Policies and governance bodies exist on paper, but nothing enforces them technically. Compliance is aspirational.",
+          domains: ["Governance"],
+          mitigation:
+            "Implement policy-as-code to enforce governance decisions automatically. Use CI gates, code ownership rules, API gateways, and DLP controls. Audit regularly and act on findings.",
+        },
+        {
+          id: "ap10",
+          title: "Context overload (sending entire repos to agents)",
+          description:
+            "Agents receive entire repository contents as context instead of curated documents, leading to confusion, slow responses, and poor output quality.",
+          domains: ["Dev Workflow", "Knowledge"],
+          mitigation:
+            "Create curated agent instruction files per repo. Use agent context configuration to point to specific documents. Implement RAG with relevance filtering instead of raw file dumps. Keep context focused and up to date.",
+        },
+        {
+          id: "ap11",
+          title: "Treating all agent output as equal quality",
+          description:
+            "No differentiation between agent-generated and human-written code in reviews, metrics, or quality standards.",
+          domains: ["PR/Review", "Evaluation"],
+          mitigation:
+            "Segment all code quality metrics by agent vs. human origin. Auto-label agent-generated PRs. Calibrate review rigor based on risk score. Track defect rates separately to identify quality divergence.",
+        },
+        {
+          id: "ap12",
+          title: "No rollback plan for agent-generated changes",
+          description:
+            "Agent-generated changes are deployed without a clear rollback strategy, making it harder to recover when problems occur.",
+          domains: ["CI/CD", "IaC", "Ops"],
+          mitigation:
+            "Apply standard rollback procedures to all agent-generated changes. Tag or label agent-generated changes for easy identification. Ensure feature flags or canary deployments are used for high-risk agent changes.",
+        },
+      ];
 
-  <!-- RESULTS -->
-  <div id="results-screen" class="screen">
-    <div class="section-card">
-      <h2>Risk Assessment Summary</h2>
-      <div class="results-grid" id="results-summary"></div>
-    </div>
+      var FAILURES = [
+        {
+          id: "fc1",
+          title: "Uncontrolled shadow adoption",
+          description:
+            "Developers adopt AI agents outside of IT and security visibility, using personal accounts and unapproved tools.",
+          mitigation:
+            "Publish an acceptable use policy early (target Level 2). Provide approved tools that are genuinely useful so developers do not seek alternatives. Monitor network traffic for known AI service endpoints.",
+          severity: "high",
+        },
+        {
+          id: "fc2",
+          title: "Checkbox compliance",
+          description:
+            "The org creates policies and checklists but does not enforce them technically. Compliance exists on paper only.",
+          mitigation:
+            "Enforce policies through automation: code ownership rules, CI gates, API gateways, DLP controls. Audit regularly and act on findings. Close the gap between documented policy and actual practice.",
+          severity: "high",
+        },
+        {
+          id: "fc3",
+          title: "Agent-generated technical debt",
+          description:
+            "Agents produce code that works but is poorly structured, over-abstracted, or inconsistent with org conventions, creating long-term maintenance burden.",
+          mitigation:
+            "Provide agents with strong project context (agent instruction files, style guides, approved patterns). Measure rework rate. Train reviewers to catch agent-specific code smells. Set clear quality expectations.",
+          severity: "medium",
+        },
+        {
+          id: "fc4",
+          title: "Review theater",
+          description:
+            "Agent-generated PRs receive perfunctory reviews because the diff is too large or reviewers trust the agent. Review adds no value.",
+          mitigation:
+            "Enforce maximum PR size limits. Auto-label agent PRs. Provide reviewer training specific to agent-generated code. Track review depth metrics (comments per PR, time spent reviewing).",
+          severity: "high",
+        },
+        {
+          id: "fc5",
+          title: "Security blind spots in regulated environments",
+          description:
+            "AI agent usage violates regulatory requirements because the org treats regulated environments the same as standard ones.",
+          mitigation:
+            "Maintain separate policies, network boundaries, and approved tool lists for regulated environments. Engage compliance before expanding agent usage into regulated systems. Document deltas between environments.",
+          severity: "high",
+        },
+        {
+          id: "fc6",
+          title: "Cost surprise",
+          description:
+            "Agent API costs grow faster than expected because usage is not metered, allocated, or capped.",
+          mitigation:
+            "Centralize API key management. Set per-team or per-project usage quotas. Monitor costs daily in the first month, then weekly. Track cost per interaction. Adjust model selection for different task types.",
+          severity: "medium",
+        },
+        {
+          id: "fc7",
+          title: "Context poisoning",
+          description:
+            "Agents produce incorrect output because they consume stale, contradictory, or irrelevant context from documentation or the codebase.",
+          mitigation:
+            "Curate agent context deliberately. Maintain documentation freshness metrics. Use RAG with editorial controls. Test agent outputs against known-good baselines. Flag and remove stale docs from agent context.",
+          severity: "medium",
+        },
+        {
+          id: "fc8",
+          title: "Skill atrophy",
+          description:
+            "Developers lose core engineering skills because they rely on agents for tasks they should understand deeply (debugging, architecture, security analysis).",
+          mitigation:
+            "Maintain requirements for human-authored work in critical areas. Rotate agent usage across task types. Include skill maintenance in professional development plans. Use agents to augment, not replace, understanding.",
+          severity: "medium",
+        },
+        {
+          id: "fc9",
+          title: "Vendor lock-in",
+          description:
+            "The org builds critical workflows around a single agent vendor proprietary features, making switching costly.",
+          mitigation:
+            "Use vendor-neutral configurations where possible. Abstract agent interactions behind internal interfaces. Evaluate multiple vendors periodically. Avoid deep integration with proprietary-only features.",
+          severity: "medium",
+        },
+        {
+          id: "fc10",
+          title: "Metrics without action",
+          description:
+            "The org collects extensive metrics on agent usage but never uses them to make decisions.",
+          mitigation:
+            "Assign an owner to each KPI. Define thresholds that trigger action. Review metrics in existing forums (sprint retros, quarterly planning). Kill metrics that do not drive decisions. Fewer metrics, more action.",
+          severity: "low",
+        },
+      ];
 
-    <div class="section-card" id="recs-section" style="display:none">
-      <h2>Priority Recommendations</h2>
-      <div id="recs-list"></div>
-    </div>
+      var checkedIds = new Set();
 
-    <div class="section-card" id="checked-detail-section" style="display:none">
-      <h2>Identified Risks -- Detail</h2>
-      <div id="checked-detail-list"></div>
-    </div>
+      function startCheck() {
+        document.getElementById("intro-screen").classList.remove("active");
+        document.getElementById("check-screen").classList.add("active");
+        document.getElementById("score-bar").classList.add("visible");
+        renderChecklists();
+      }
 
-    <div class="section-card" id="clean-section" style="display:none">
-      <h2>Areas Without Identified Risks</h2>
-      <p style="font-size:0.88rem;color:var(--color-text-muted);margin-bottom:12px">These anti-patterns and failure conditions were not identified in your organization.</p>
-      <div id="clean-list"></div>
-    </div>
+      function renderChecklists() {
+        var apHtml = "";
+        for (var i = 0; i < ANTI_PATTERNS.length; i++) {
+          var ap = ANTI_PATTERNS[i];
+          apHtml += renderCheckItem(ap, true);
+        }
+        document.getElementById("anti-patterns-list").innerHTML = apHtml;
 
-    <div class="export-bar">
-      <button class="btn btn-secondary btn-sm" onclick="exportMarkdown()">Download as Markdown</button>
-      <button class="btn btn-secondary btn-sm" onclick="copyToClipboard()">Copy to Clipboard</button>
-      <button class="btn btn-secondary btn-sm" onclick="window.print()">Print / PDF</button>
-      <button class="btn btn-secondary btn-sm" onclick="restart()">Start Over</button>
-    </div>
-  </div>
-</div>
+        var fcHtml = "";
+        for (var i = 0; i < FAILURES.length; i++) {
+          fcHtml += renderCheckItem(FAILURES[i], false);
+        }
+        document.getElementById("failures-list").innerHTML = fcHtml;
+      }
 
-<div class="toast" id="toast"></div>
+      function renderCheckItem(item, hasDomains) {
+        var html =
+          '<div class="check-item" id="item-' +
+          item.id +
+          '" onclick="toggleItem(\'' +
+          item.id +
+          "')\">";
+        html += '<input type="checkbox" id="cb-' + item.id + '">';
+        html += '<div class="item-body">';
+        html += '<div class="item-title">' + item.title + "</div>";
+        html += '<div class="item-desc">' + item.description + "</div>";
+        if (hasDomains && item.domains) {
+          html += '<div class="item-domains">';
+          for (var d = 0; d < item.domains.length; d++) {
+            html += '<span class="domain-tag">' + item.domains[d] + "</span>";
+          }
+          html += "</div>";
+        }
+        html +=
+          '<div class="mitigation-text"><div class="mitigation-label">Mitigation</div>' +
+          item.mitigation +
+          "</div>";
+        html += "</div></div>";
+        return html;
+      }
 
-<script>
-var ANTI_PATTERNS = [
-  {
-    id: 'ap1',
-    title: 'Rubber-stamping agent PRs',
-    description: 'Agent-generated PRs receive perfunctory reviews because reviewers assume the agent "knows what it is doing" or because the diff is too large to review carefully.',
-    domains: ['PR/Review'],
-    mitigation: 'Enforce review depth metrics. Auto-label agent PRs so reviewers know to apply extra scrutiny. Limit maximum PR size. Provide reviewer training specific to agent-generated code patterns (over-abstraction, hallucinated imports, incorrect error handling).'
-  },
-  {
-    id: 'ap2',
-    title: 'Wildcard IAM/RBAC in agent-generated IaC',
-    description: 'Agents generate identity and access policies with wildcard actions or resources (e.g., "Action": "*"), creating overly permissive access.',
-    domains: ['IaC', 'Security'],
-    mitigation: 'Implement policy-as-code (OPA, Sentinel) that blocks wildcard policies in CI. Add explicit prohibitions to agent instruction files. Run linters (checkov, tfsec) pre-merge with wildcard detection rules.'
-  },
-  {
-    id: 'ap3',
-    title: 'Agents with production credentials',
-    description: 'Agents have the same access as the engineers using them, including write access to production systems.',
-    domains: ['Ops', 'Security'],
-    mitigation: 'Implement least-privilege roles for agents. Ops access should be read-only. Pre-approved remediation action lists constrain what agents can do. Separate agent credentials from human credentials.'
-  },
-  {
-    id: 'ap4',
-    title: 'Personal API keys for agents',
-    description: 'Developers use personal API keys for AI agent services. No centralized key management, no visibility into usage, no cost control.',
-    domains: ['Security', 'Governance'],
-    mitigation: 'Deploy centralized API key management (Vault, AWS Secrets Manager, or similar). Route agent API traffic through an org-managed proxy. Block direct API access via network controls. Allocate costs to teams.'
-  },
-  {
-    id: 'ap5',
-    title: 'Ignoring regulated/standard environment boundary',
-    description: 'Regulated environments (FedRAMP, HIPAA, PCI-DSS, GDPR) use the same AI agent endpoints, policies, and tooling as standard environments.',
-    domains: ['Security', 'IaC', 'Governance'],
-    mitigation: 'Maintain separate policies, network boundaries, and approved tool lists for regulated environments. Use self-hosted models or authorized endpoints for regulated data. Assess regulated environments separately.'
-  },
-  {
-    id: 'ap6',
-    title: 'Agent-generated docs accepted without review',
-    description: 'Agents generate or update documentation and it is merged without human review, potentially containing hallucinated content.',
-    domains: ['Knowledge'],
-    mitigation: 'Establish a review workflow for all agent-generated documentation. Implement hallucination checks (verify referenced APIs, imports, and configurations exist). Require human editorial approval before merge.'
-  },
-  {
-    id: 'ap7',
-    title: 'Bespoke CI pipelines per repo',
-    description: 'Every repository has custom pipeline logic. No reusable components. Agents generate new bespoke pipelines each time.',
-    domains: ['CI/CD'],
-    mitigation: 'Build a reusable pipeline component library. Instruct agents to use shared components. Standardize pipeline structure through documentation and templates. Enforce via code ownership on pipeline config directories.'
-  },
-  {
-    id: 'ap8',
-    title: 'Measuring adoption without quality',
-    description: 'The organization tracks agent adoption rate but not the quality of agent-generated output. High adoption masks increasing defect rates or technical debt.',
-    domains: ['Evaluation'],
-    mitigation: 'Track defect rate, rework rate, and security finding rate for agent-generated code alongside adoption metrics. Segment PR metrics by origin. Measure code quality, not just velocity.'
-  },
-  {
-    id: 'ap9',
-    title: 'Governance without enforcement',
-    description: 'Policies and governance bodies exist on paper, but nothing enforces them technically. Compliance is aspirational.',
-    domains: ['Governance'],
-    mitigation: 'Implement policy-as-code to enforce governance decisions automatically. Use CI gates, code ownership rules, API gateways, and DLP controls. Audit regularly and act on findings.'
-  },
-  {
-    id: 'ap10',
-    title: 'Context overload (sending entire repos to agents)',
-    description: 'Agents receive entire repository contents as context instead of curated documents, leading to confusion, slow responses, and poor output quality.',
-    domains: ['Dev Workflow', 'Knowledge'],
-    mitigation: 'Create curated agent instruction files per repo. Use agent context configuration to point to specific documents. Implement RAG with relevance filtering instead of raw file dumps. Keep context focused and up to date.'
-  },
-  {
-    id: 'ap11',
-    title: 'Treating all agent output as equal quality',
-    description: 'No differentiation between agent-generated and human-written code in reviews, metrics, or quality standards.',
-    domains: ['PR/Review', 'Evaluation'],
-    mitigation: 'Segment all code quality metrics by agent vs. human origin. Auto-label agent-generated PRs. Calibrate review rigor based on risk score. Track defect rates separately to identify quality divergence.'
-  },
-  {
-    id: 'ap12',
-    title: 'No rollback plan for agent-generated changes',
-    description: 'Agent-generated changes are deployed without a clear rollback strategy, making it harder to recover when problems occur.',
-    domains: ['CI/CD', 'IaC', 'Ops'],
-    mitigation: 'Apply standard rollback procedures to all agent-generated changes. Tag or label agent-generated changes for easy identification. Ensure feature flags or canary deployments are used for high-risk agent changes.'
-  }
-];
+      function toggleItem(id) {
+        if (checkedIds.has(id)) {
+          checkedIds.delete(id);
+        } else {
+          checkedIds.add(id);
+        }
+        var el = document.getElementById("item-" + id);
+        var cb = document.getElementById("cb-" + id);
+        el.classList.toggle("checked");
+        cb.checked = checkedIds.has(id);
+        updateScoreBar();
+      }
 
-var FAILURES = [
-  {
-    id: 'fc1',
-    title: 'Uncontrolled shadow adoption',
-    description: 'Developers adopt AI agents outside of IT and security visibility, using personal accounts and unapproved tools.',
-    mitigation: 'Publish an acceptable use policy early (target Level 2). Provide approved tools that are genuinely useful so developers do not seek alternatives. Monitor network traffic for known AI service endpoints.',
-    severity: 'high'
-  },
-  {
-    id: 'fc2',
-    title: 'Checkbox compliance',
-    description: 'The org creates policies and checklists but does not enforce them technically. Compliance exists on paper only.',
-    mitigation: 'Enforce policies through automation: code ownership rules, CI gates, API gateways, DLP controls. Audit regularly and act on findings. Close the gap between documented policy and actual practice.',
-    severity: 'high'
-  },
-  {
-    id: 'fc3',
-    title: 'Agent-generated technical debt',
-    description: 'Agents produce code that works but is poorly structured, over-abstracted, or inconsistent with org conventions, creating long-term maintenance burden.',
-    mitigation: 'Provide agents with strong project context (agent instruction files, style guides, approved patterns). Measure rework rate. Train reviewers to catch agent-specific code smells. Set clear quality expectations.',
-    severity: 'medium'
-  },
-  {
-    id: 'fc4',
-    title: 'Review theater',
-    description: 'Agent-generated PRs receive perfunctory reviews because the diff is too large or reviewers trust the agent. Review adds no value.',
-    mitigation: 'Enforce maximum PR size limits. Auto-label agent PRs. Provide reviewer training specific to agent-generated code. Track review depth metrics (comments per PR, time spent reviewing).',
-    severity: 'high'
-  },
-  {
-    id: 'fc5',
-    title: 'Security blind spots in regulated environments',
-    description: 'AI agent usage violates regulatory requirements because the org treats regulated environments the same as standard ones.',
-    mitigation: 'Maintain separate policies, network boundaries, and approved tool lists for regulated environments. Engage compliance before expanding agent usage into regulated systems. Document deltas between environments.',
-    severity: 'high'
-  },
-  {
-    id: 'fc6',
-    title: 'Cost surprise',
-    description: 'Agent API costs grow faster than expected because usage is not metered, allocated, or capped.',
-    mitigation: 'Centralize API key management. Set per-team or per-project usage quotas. Monitor costs daily in the first month, then weekly. Track cost per interaction. Adjust model selection for different task types.',
-    severity: 'medium'
-  },
-  {
-    id: 'fc7',
-    title: 'Context poisoning',
-    description: 'Agents produce incorrect output because they consume stale, contradictory, or irrelevant context from documentation or the codebase.',
-    mitigation: 'Curate agent context deliberately. Maintain documentation freshness metrics. Use RAG with editorial controls. Test agent outputs against known-good baselines. Flag and remove stale docs from agent context.',
-    severity: 'medium'
-  },
-  {
-    id: 'fc8',
-    title: 'Skill atrophy',
-    description: 'Developers lose core engineering skills because they rely on agents for tasks they should understand deeply (debugging, architecture, security analysis).',
-    mitigation: 'Maintain requirements for human-authored work in critical areas. Rotate agent usage across task types. Include skill maintenance in professional development plans. Use agents to augment, not replace, understanding.',
-    severity: 'medium'
-  },
-  {
-    id: 'fc9',
-    title: 'Vendor lock-in',
-    description: 'The org builds critical workflows around a single agent vendor proprietary features, making switching costly.',
-    mitigation: 'Use vendor-neutral configurations where possible. Abstract agent interactions behind internal interfaces. Evaluate multiple vendors periodically. Avoid deep integration with proprietary-only features.',
-    severity: 'medium'
-  },
-  {
-    id: 'fc10',
-    title: 'Metrics without action',
-    description: 'The org collects extensive metrics on agent usage but never uses them to make decisions.',
-    mitigation: 'Assign an owner to each KPI. Define thresholds that trigger action. Review metrics in existing forums (sprint retros, quarterly planning). Kill metrics that do not drive decisions. Fewer metrics, more action.',
-    severity: 'low'
-  }
-];
+      function updateScoreBar() {
+        var total = ANTI_PATTERNS.length + FAILURES.length;
+        var count = checkedIds.size;
+        document.getElementById("bar-count").textContent = count;
 
-var checkedIds = new Set();
+        var riskEl = document.getElementById("bar-risk");
+        if (count <= 3) {
+          riskEl.textContent = "Low Risk";
+          riskEl.className = "risk-level risk-low";
+        } else if (count <= 8) {
+          riskEl.textContent = "Medium Risk";
+          riskEl.className = "risk-level risk-medium";
+        } else {
+          riskEl.textContent = "High Risk";
+          riskEl.className = "risk-level risk-high";
+        }
+      }
 
-function startCheck() {
-  document.getElementById('intro-screen').classList.remove('active');
-  document.getElementById('check-screen').classList.add('active');
-  document.getElementById('score-bar').classList.add('visible');
-  renderChecklists();
-}
+      function showResults() {
+        document.getElementById("check-screen").classList.remove("active");
+        document.getElementById("results-screen").classList.add("active");
+        document.getElementById("score-bar").classList.remove("visible");
 
-function renderChecklists() {
-  var apHtml = '';
-  for (var i = 0; i < ANTI_PATTERNS.length; i++) {
-    var ap = ANTI_PATTERNS[i];
-    apHtml += renderCheckItem(ap, true);
-  }
-  document.getElementById('anti-patterns-list').innerHTML = apHtml;
+        var total = ANTI_PATTERNS.length + FAILURES.length;
+        var apCount = 0,
+          fcCount = 0,
+          highCount = 0;
 
-  var fcHtml = '';
-  for (var i = 0; i < FAILURES.length; i++) {
-    fcHtml += renderCheckItem(FAILURES[i], false);
-  }
-  document.getElementById('failures-list').innerHTML = fcHtml;
-}
+        for (var i = 0; i < ANTI_PATTERNS.length; i++) {
+          if (checkedIds.has(ANTI_PATTERNS[i].id)) apCount++;
+        }
+        for (var i = 0; i < FAILURES.length; i++) {
+          if (checkedIds.has(FAILURES[i].id)) {
+            fcCount++;
+            if (FAILURES[i].severity === "high") highCount++;
+          }
+        }
 
-function renderCheckItem(item, hasDomains) {
-  var html = '<div class="check-item" id="item-' + item.id + '" onclick="toggleItem(\'' + item.id + '\')">';
-  html += '<input type="checkbox" id="cb-' + item.id + '">';
-  html += '<div class="item-body">';
-  html += '<div class="item-title">' + item.title + '</div>';
-  html += '<div class="item-desc">' + item.description + '</div>';
-  if (hasDomains && item.domains) {
-    html += '<div class="item-domains">';
-    for (var d = 0; d < item.domains.length; d++) {
-      html += '<span class="domain-tag">' + item.domains[d] + '</span>';
-    }
-    html += '</div>';
-  }
-  html += '<div class="mitigation-text"><div class="mitigation-label">Mitigation</div>' + item.mitigation + '</div>';
-  html += '</div></div>';
-  return html;
-}
+        var totalChecked = apCount + fcCount;
+        var riskColor, riskLabel;
+        if (totalChecked <= 3) {
+          riskColor = "var(--color-green)";
+          riskLabel = "Low";
+        } else if (totalChecked <= 8) {
+          riskColor = "var(--color-yellow)";
+          riskLabel = "Medium";
+        } else {
+          riskColor = "var(--color-red)";
+          riskLabel = "High";
+        }
 
-function toggleItem(id) {
-  if (checkedIds.has(id)) {
-    checkedIds.delete(id);
-  } else {
-    checkedIds.add(id);
-  }
-  var el = document.getElementById('item-' + id);
-  var cb = document.getElementById('cb-' + id);
-  el.classList.toggle('checked');
-  cb.checked = checkedIds.has(id);
-  updateScoreBar();
-}
+        document.getElementById("results-summary").innerHTML =
+          '<div class="result-card"><div class="result-value" style="color:' +
+          riskColor +
+          '">' +
+          riskLabel +
+          '</div><div class="result-label">Overall risk level</div></div>' +
+          '<div class="result-card"><div class="result-value">' +
+          totalChecked +
+          " / " +
+          total +
+          '</div><div class="result-label">Risks identified</div></div>' +
+          '<div class="result-card"><div class="result-value">' +
+          apCount +
+          " / " +
+          ANTI_PATTERNS.length +
+          '</div><div class="result-label">Anti-patterns present</div></div>' +
+          '<div class="result-card"><div class="result-value">' +
+          fcCount +
+          " / " +
+          FAILURES.length +
+          '</div><div class="result-label">Failure conditions at risk</div></div>';
 
-function updateScoreBar() {
-  var total = ANTI_PATTERNS.length + FAILURES.length;
-  var count = checkedIds.size;
-  document.getElementById('bar-count').textContent = count;
+        // Priority recommendations
+        var recs = [];
+        // Security-related
+        if (
+          checkedIds.has("ap2") ||
+          checkedIds.has("ap3") ||
+          checkedIds.has("ap4") ||
+          checkedIds.has("ap5") ||
+          checkedIds.has("fc1") ||
+          checkedIds.has("fc5")
+        ) {
+          recs.push({
+            title: "Secure agent access immediately",
+            desc: "You have security-related risks. Prioritize: publish acceptable use policy, centralize API key management, enforce network boundaries for regulated environments, and implement least-privilege agent access.",
+          });
+        }
+        // Governance
+        if (
+          checkedIds.has("ap9") ||
+          checkedIds.has("fc2") ||
+          checkedIds.has("fc10")
+        ) {
+          recs.push({
+            title: "Strengthen governance enforcement",
+            desc: "Governance exists on paper but is not enforced. Implement policy-as-code, CI gates, and automated compliance checks. Assign KPI owners and define action thresholds.",
+          });
+        }
+        // Quality
+        if (
+          checkedIds.has("ap1") ||
+          checkedIds.has("ap8") ||
+          checkedIds.has("ap11") ||
+          checkedIds.has("fc3") ||
+          checkedIds.has("fc4")
+        ) {
+          recs.push({
+            title: "Improve code review and quality measurement",
+            desc: "Agent-generated code quality is not being managed. Auto-label agent PRs, enforce PR size limits, segment defect metrics by origin, and train reviewers on agent-specific code smells.",
+          });
+        }
+        // Knowledge
+        if (
+          checkedIds.has("ap6") ||
+          checkedIds.has("ap10") ||
+          checkedIds.has("fc7")
+        ) {
+          recs.push({
+            title: "Fix agent context and knowledge management",
+            desc: "Agents are working with poor context. Create curated agent instruction files per repo, implement documentation review workflows, and set up a searchable documentation index.",
+          });
+        }
+        // Platform
+        if (
+          checkedIds.has("ap7") ||
+          checkedIds.has("ap12") ||
+          checkedIds.has("fc6") ||
+          checkedIds.has("fc9")
+        ) {
+          recs.push({
+            title: "Standardize platform and CI/CD practices",
+            desc: "Platform foundations are weak. Build a reusable pipeline component library, implement cost tracking and quotas, ensure rollback plans for agent changes, and evaluate vendor lock-in exposure.",
+          });
+        }
+        // People
+        if (checkedIds.has("fc8")) {
+          recs.push({
+            title: "Address skill development concerns",
+            desc: "Developer skill atrophy is a risk. Maintain requirements for human-authored work in critical areas, rotate agent usage, and include skill maintenance in development plans.",
+          });
+        }
 
-  var riskEl = document.getElementById('bar-risk');
-  if (count <= 3) {
-    riskEl.textContent = 'Low Risk';
-    riskEl.className = 'risk-level risk-low';
-  } else if (count <= 8) {
-    riskEl.textContent = 'Medium Risk';
-    riskEl.className = 'risk-level risk-medium';
-  } else {
-    riskEl.textContent = 'High Risk';
-    riskEl.className = 'risk-level risk-high';
-  }
-}
+        var recsSection = document.getElementById("recs-section");
+        if (recs.length > 0) {
+          recsSection.style.display = "block";
+          var recsHtml = "";
+          for (var i = 0; i < recs.length; i++) {
+            recsHtml +=
+              '<div class="recommendation-item"><strong>' +
+              recs[i].title +
+              "</strong>" +
+              recs[i].desc +
+              "</div>";
+          }
+          document.getElementById("recs-list").innerHTML = recsHtml;
+        } else {
+          recsSection.style.display = "none";
+        }
 
-function showResults() {
-  document.getElementById('check-screen').classList.remove('active');
-  document.getElementById('results-screen').classList.add('active');
-  document.getElementById('score-bar').classList.remove('visible');
+        // Checked detail
+        var allItems = ANTI_PATTERNS.concat(FAILURES);
+        var checkedItems = allItems.filter(function (it) {
+          return checkedIds.has(it.id);
+        });
+        var cleanItems = allItems.filter(function (it) {
+          return !checkedIds.has(it.id);
+        });
 
-  var total = ANTI_PATTERNS.length + FAILURES.length;
-  var apCount = 0, fcCount = 0, highCount = 0;
+        if (checkedItems.length > 0) {
+          document.getElementById("checked-detail-section").style.display =
+            "block";
+          var detailHtml = "";
+          for (var i = 0; i < checkedItems.length; i++) {
+            var it = checkedItems[i];
+            detailHtml +=
+              '<div style="padding:12px 0;border-bottom:1px solid var(--color-border)">';
+            detailHtml +=
+              '<div style="font-weight:600;font-size:0.9rem;margin-bottom:4px">' +
+              it.title +
+              "</div>";
+            detailHtml +=
+              '<div style="font-size:0.83rem;color:var(--color-text-muted);margin-bottom:6px">' +
+              it.description +
+              "</div>";
+            detailHtml +=
+              '<div style="font-size:0.83rem;padding:8px 12px;background:var(--color-primary-light);border-radius:6px"><strong>Mitigation:</strong> ' +
+              it.mitigation +
+              "</div>";
+            detailHtml += "</div>";
+          }
+          document.getElementById("checked-detail-list").innerHTML = detailHtml;
+        }
 
-  for (var i = 0; i < ANTI_PATTERNS.length; i++) {
-    if (checkedIds.has(ANTI_PATTERNS[i].id)) apCount++;
-  }
-  for (var i = 0; i < FAILURES.length; i++) {
-    if (checkedIds.has(FAILURES[i].id)) {
-      fcCount++;
-      if (FAILURES[i].severity === 'high') highCount++;
-    }
-  }
+        if (cleanItems.length > 0) {
+          document.getElementById("clean-section").style.display = "block";
+          var cleanHtml =
+            '<ul style="padding-left:20px;font-size:0.88rem;color:var(--color-text-muted)">';
+          for (var i = 0; i < cleanItems.length; i++) {
+            cleanHtml +=
+              '<li style="margin-bottom:4px">' + cleanItems[i].title + "</li>";
+          }
+          cleanHtml += "</ul>";
+          document.getElementById("clean-list").innerHTML = cleanHtml;
+        }
 
-  var totalChecked = apCount + fcCount;
-  var riskColor, riskLabel;
-  if (totalChecked <= 3) { riskColor = 'var(--color-green)'; riskLabel = 'Low'; }
-  else if (totalChecked <= 8) { riskColor = 'var(--color-yellow)'; riskLabel = 'Medium'; }
-  else { riskColor = 'var(--color-red)'; riskLabel = 'High'; }
+        window.scrollTo(0, 0);
+      }
 
-  document.getElementById('results-summary').innerHTML =
-    '<div class="result-card"><div class="result-value" style="color:' + riskColor + '">' + riskLabel + '</div><div class="result-label">Overall risk level</div></div>' +
-    '<div class="result-card"><div class="result-value">' + totalChecked + ' / ' + total + '</div><div class="result-label">Risks identified</div></div>' +
-    '<div class="result-card"><div class="result-value">' + apCount + ' / ' + ANTI_PATTERNS.length + '</div><div class="result-label">Anti-patterns present</div></div>' +
-    '<div class="result-card"><div class="result-value">' + fcCount + ' / ' + FAILURES.length + '</div><div class="result-label">Failure conditions at risk</div></div>';
+      function restart() {
+        checkedIds.clear();
+        document.getElementById("results-screen").classList.remove("active");
+        document.getElementById("intro-screen").classList.add("active");
+        document.getElementById("score-bar").classList.remove("visible");
+      }
 
-  // Priority recommendations
-  var recs = [];
-  // Security-related
-  if (checkedIds.has('ap2') || checkedIds.has('ap3') || checkedIds.has('ap4') || checkedIds.has('ap5') || checkedIds.has('fc1') || checkedIds.has('fc5')) {
-    recs.push({ title: 'Secure agent access immediately', desc: 'You have security-related risks. Prioritize: publish acceptable use policy, centralize API key management, enforce network boundaries for regulated environments, and implement least-privilege agent access.' });
-  }
-  // Governance
-  if (checkedIds.has('ap9') || checkedIds.has('fc2') || checkedIds.has('fc10')) {
-    recs.push({ title: 'Strengthen governance enforcement', desc: 'Governance exists on paper but is not enforced. Implement policy-as-code, CI gates, and automated compliance checks. Assign KPI owners and define action thresholds.' });
-  }
-  // Quality
-  if (checkedIds.has('ap1') || checkedIds.has('ap8') || checkedIds.has('ap11') || checkedIds.has('fc3') || checkedIds.has('fc4')) {
-    recs.push({ title: 'Improve code review and quality measurement', desc: 'Agent-generated code quality is not being managed. Auto-label agent PRs, enforce PR size limits, segment defect metrics by origin, and train reviewers on agent-specific code smells.' });
-  }
-  // Knowledge
-  if (checkedIds.has('ap6') || checkedIds.has('ap10') || checkedIds.has('fc7')) {
-    recs.push({ title: 'Fix agent context and knowledge management', desc: 'Agents are working with poor context. Create curated agent instruction files per repo, implement documentation review workflows, and set up a searchable documentation index.' });
-  }
-  // Platform
-  if (checkedIds.has('ap7') || checkedIds.has('ap12') || checkedIds.has('fc6') || checkedIds.has('fc9')) {
-    recs.push({ title: 'Standardize platform and CI/CD practices', desc: 'Platform foundations are weak. Build a reusable pipeline component library, implement cost tracking and quotas, ensure rollback plans for agent changes, and evaluate vendor lock-in exposure.' });
-  }
-  // People
-  if (checkedIds.has('fc8')) {
-    recs.push({ title: 'Address skill development concerns', desc: 'Developer skill atrophy is a risk. Maintain requirements for human-authored work in critical areas, rotate agent usage, and include skill maintenance in development plans.' });
-  }
+      function generateMarkdown() {
+        var total = ANTI_PATTERNS.length + FAILURES.length;
+        var allItems = ANTI_PATTERNS.concat(FAILURES);
+        var checkedItems = allItems.filter(function (it) {
+          return checkedIds.has(it.id);
+        });
+        var cleanItems = allItems.filter(function (it) {
+          return !checkedIds.has(it.id);
+        });
 
-  var recsSection = document.getElementById('recs-section');
-  if (recs.length > 0) {
-    recsSection.style.display = 'block';
-    var recsHtml = '';
-    for (var i = 0; i < recs.length; i++) {
-      recsHtml += '<div class="recommendation-item"><strong>' + recs[i].title + '</strong>' + recs[i].desc + '</div>';
-    }
-    document.getElementById('recs-list').innerHTML = recsHtml;
-  } else {
-    recsSection.style.display = 'none';
-  }
+        var riskLabel;
+        if (checkedItems.length <= 3) riskLabel = "Low";
+        else if (checkedItems.length <= 8) riskLabel = "Medium";
+        else riskLabel = "High";
 
-  // Checked detail
-  var allItems = ANTI_PATTERNS.concat(FAILURES);
-  var checkedItems = allItems.filter(function(it) { return checkedIds.has(it.id); });
-  var cleanItems = allItems.filter(function(it) { return !checkedIds.has(it.id); });
+        var md = "# AI Agent CMM -- Anti-Pattern and Risk Assessment\n\n";
+        md += "Generated: " + new Date().toLocaleDateString() + "\n\n";
+        md += "## Summary\n\n";
+        md += "- **Risk level**: " + riskLabel + "\n";
+        md +=
+          "- **Risks identified**: " +
+          checkedItems.length +
+          " / " +
+          total +
+          "\n\n";
 
-  if (checkedItems.length > 0) {
-    document.getElementById('checked-detail-section').style.display = 'block';
-    var detailHtml = '';
-    for (var i = 0; i < checkedItems.length; i++) {
-      var it = checkedItems[i];
-      detailHtml += '<div style="padding:12px 0;border-bottom:1px solid var(--color-border)">';
-      detailHtml += '<div style="font-weight:600;font-size:0.9rem;margin-bottom:4px">' + it.title + '</div>';
-      detailHtml += '<div style="font-size:0.83rem;color:var(--color-text-muted);margin-bottom:6px">' + it.description + '</div>';
-      detailHtml += '<div style="font-size:0.83rem;padding:8px 12px;background:var(--color-primary-light);border-radius:6px"><strong>Mitigation:</strong> ' + it.mitigation + '</div>';
-      detailHtml += '</div>';
-    }
-    document.getElementById('checked-detail-list').innerHTML = detailHtml;
-  }
+        if (checkedItems.length > 0) {
+          md += "## Identified Risks\n\n";
+          for (var i = 0; i < checkedItems.length; i++) {
+            var it = checkedItems[i];
+            md += "### " + it.title + "\n\n";
+            md += it.description + "\n\n";
+            md += "**Mitigation**: " + it.mitigation + "\n\n";
+          }
+        }
 
-  if (cleanItems.length > 0) {
-    document.getElementById('clean-section').style.display = 'block';
-    var cleanHtml = '<ul style="padding-left:20px;font-size:0.88rem;color:var(--color-text-muted)">';
-    for (var i = 0; i < cleanItems.length; i++) {
-      cleanHtml += '<li style="margin-bottom:4px">' + cleanItems[i].title + '</li>';
-    }
-    cleanHtml += '</ul>';
-    document.getElementById('clean-list').innerHTML = cleanHtml;
-  }
+        if (cleanItems.length > 0) {
+          md += "## Not Identified\n\n";
+          for (var i = 0; i < cleanItems.length; i++) {
+            md += "- " + cleanItems[i].title + "\n";
+          }
+          md += "\n";
+        }
 
-  window.scrollTo(0, 0);
-}
+        return md;
+      }
 
-function restart() {
-  checkedIds.clear();
-  document.getElementById('results-screen').classList.remove('active');
-  document.getElementById('intro-screen').classList.add('active');
-  document.getElementById('score-bar').classList.remove('visible');
-}
+      function exportMarkdown() {
+        var md = generateMarkdown();
+        var blob = new Blob([md], { type: "text/markdown" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download =
+          "cmm-risk-check-" + new Date().toISOString().slice(0, 10) + ".md";
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("Downloaded.");
+      }
 
-function generateMarkdown() {
-  var total = ANTI_PATTERNS.length + FAILURES.length;
-  var allItems = ANTI_PATTERNS.concat(FAILURES);
-  var checkedItems = allItems.filter(function(it) { return checkedIds.has(it.id); });
-  var cleanItems = allItems.filter(function(it) { return !checkedIds.has(it.id); });
+      function copyToClipboard() {
+        var md = generateMarkdown();
+        navigator.clipboard
+          .writeText(md)
+          .then(function () {
+            showToast("Copied to clipboard.");
+          })
+          .catch(function () {
+            var ta = document.createElement("textarea");
+            ta.value = md;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            showToast("Copied to clipboard.");
+          });
+      }
 
-  var riskLabel;
-  if (checkedItems.length <= 3) riskLabel = 'Low';
-  else if (checkedItems.length <= 8) riskLabel = 'Medium';
-  else riskLabel = 'High';
-
-  var md = '# AI Agent CMM -- Anti-Pattern and Risk Assessment\n\n';
-  md += 'Generated: ' + new Date().toLocaleDateString() + '\n\n';
-  md += '## Summary\n\n';
-  md += '- **Risk level**: ' + riskLabel + '\n';
-  md += '- **Risks identified**: ' + checkedItems.length + ' / ' + total + '\n\n';
-
-  if (checkedItems.length > 0) {
-    md += '## Identified Risks\n\n';
-    for (var i = 0; i < checkedItems.length; i++) {
-      var it = checkedItems[i];
-      md += '### ' + it.title + '\n\n';
-      md += it.description + '\n\n';
-      md += '**Mitigation**: ' + it.mitigation + '\n\n';
-    }
-  }
-
-  if (cleanItems.length > 0) {
-    md += '## Not Identified\n\n';
-    for (var i = 0; i < cleanItems.length; i++) {
-      md += '- ' + cleanItems[i].title + '\n';
-    }
-    md += '\n';
-  }
-
-  return md;
-}
-
-function exportMarkdown() {
-  var md = generateMarkdown();
-  var blob = new Blob([md], { type: 'text/markdown' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'cmm-risk-check-' + new Date().toISOString().slice(0, 10) + '.md';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Downloaded.');
-}
-
-function copyToClipboard() {
-  var md = generateMarkdown();
-  navigator.clipboard.writeText(md).then(function() {
-    showToast('Copied to clipboard.');
-  }).catch(function() {
-    var ta = document.createElement('textarea');
-    ta.value = md;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('Copied to clipboard.');
-  });
-}
-
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2500);
-}
-</script>
-</body>
+      function showToast(msg) {
+        var t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(function () {
+          t.classList.remove("show");
+        }, 2500);
+      }
+    </script>
+  </body>
 </html>

@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agent Capability Maturity Model (AI-CMM)</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --color-bg: #f8f9fa;
+        --color-surface: #ffffff;
+        --color-border: #dee2e6;
+        --color-text: #212529;
+        --color-text-muted: #6c757d;
+        --color-primary: #2563eb;
+        --color-primary-light: #dbeafe;
+        --color-red: #dc2626;
+        --color-green: #16a34a;
+        --color-green-light: #f0fdf4;
+        --radius: 8px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-lg:
+          0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        --color-l0: #94a3b8;
+        --color-l1: #f97316;
+        --color-l2: #eab308;
+        --color-l3: #3b82f6;
+        --color-l4: #8b5cf6;
+        --color-l5: #16a34a;
+        --color-domain-1: #3b82f6;
+        --color-domain-2: #8b5cf6;
+        --color-domain-3: #06b6d4;
+        --color-domain-4: #10b981;
+        --color-domain-5: #f59e0b;
+        --color-domain-6: #ef4444;
+        --color-domain-7: #ec4899;
+        --color-domain-8: #6366f1;
+        --color-domain-9: #14b8a6;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+      }
+
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 24px 64px;
+      }
+
+      /* --- Hero --- */
+      .hero {
+        text-align: center;
+        padding: 48px 24px 40px;
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        color: #fff;
+        border-radius: var(--radius);
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-lg);
+      }
+      .hero h1 {
+        font-size: 2rem;
+        margin-bottom: 12px;
+        letter-spacing: -0.01em;
+      }
+      .hero .subtitle {
+        font-size: 1.05rem;
+        opacity: 0.9;
+        max-width: 640px;
+        margin: 0 auto 24px;
+        line-height: 1.5;
+      }
+      .hero .badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 4px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+
+      /* --- Section --- */
+      .section {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px 32px;
+        margin-bottom: 20px;
+      }
+      .section h2 {
+        font-size: 1.15rem;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      /* --- Tool cards --- */
+      .tool-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 640px) {
+        .tool-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .tool-card {
+        display: block;
+        background: var(--color-surface);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius);
+        padding: 24px;
+        transition: all 0.15s ease;
+        text-decoration: none !important;
+        color: var(--color-text);
+      }
+      .tool-card:hover {
+        border-color: var(--color-primary);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+      }
+      .tool-card .icon {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+      .tool-card h3 {
+        font-size: 1rem;
+        margin-bottom: 6px;
+        color: var(--color-primary);
+      }
+      .tool-card p {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        line-height: 1.5;
+      }
+      .tool-card .tag {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: var(--color-primary-light);
+        color: var(--color-primary);
+      }
+
+      /* --- Level ladder --- */
+      .level-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+      .level-table th,
+      .level-table td {
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .level-table th {
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-text-muted);
+        background: var(--color-bg);
+      }
+      .level-table td:first-child {
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .level-badge {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      /* --- Doc list --- */
+      .doc-list {
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      @media (max-width: 640px) {
+        .doc-list {
+          grid-template-columns: 1fr;
+        }
+      }
+      .doc-list li a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        font-size: 0.88rem;
+        font-weight: 500;
+        transition: all 0.15s ease;
+      }
+      .doc-list li a:hover {
+        border-color: var(--color-primary);
+        background: var(--color-primary-light);
+        text-decoration: none;
+      }
+      .doc-list li a .doc-icon {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+      .doc-list li a .doc-desc {
+        font-weight: 400;
+        font-size: 0.78rem;
+        color: var(--color-text-muted);
+        display: block;
+      }
+
+      /* --- Domain pills --- */
+      .domain-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .domain-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+      }
+      .domain-pill .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      /* --- Footer --- */
+      .site-footer {
+        text-align: center;
+        padding: 24px;
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+      }
+      .site-footer a {
+        color: var(--color-text-muted);
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- Hero -->
+      <div class="hero">
+        <h1>AI Agent Capability Maturity Model</h1>
+        <p class="subtitle">
+          A structured framework for organizations to adopt AI coding agents
+          &mdash; GitHub Copilot, Claude Code, Cursor, and others &mdash;
+          safely, measurably, and at scale.
+        </p>
+        <span class="badge">CC BY 4.0 &middot; Open Framework</span>
+      </div>
+
+      <!-- Interactive Tools -->
+      <div class="section">
+        <h2>Interactive Tools</h2>
+        <div class="tool-grid">
+          <a class="tool-card" href="assessment/">
+            <div class="icon">📊</div>
+            <h3>Interactive Assessment</h3>
+            <p>
+              Score your organization across 9 domains, generate a radar chart,
+              and build a tailored 90-day improvement plan.
+            </p>
+            <span class="tag">Start here</span>
+          </a>
+          <a class="tool-card" href="executive-summary/">
+            <div class="icon">📄</div>
+            <h3>Executive Summary</h3>
+            <p>
+              Printable one-pager overview of the maturity model for leadership
+              and stakeholders.
+            </p>
+            <span class="tag">Leadership</span>
+          </a>
+          <a class="tool-card" href="domains/">
+            <div class="icon">🔍</div>
+            <h3>Domain Deep-Dive</h3>
+            <p>
+              Detailed reference for all 9 capability domains with practices,
+              artifacts, and anti-patterns per level.
+            </p>
+            <span class="tag">Reference</span>
+          </a>
+          <a class="tool-card" href="anti-patterns/">
+            <div class="icon">⚠️</div>
+            <h3>Anti-Pattern Checker</h3>
+            <p>
+              Interactive diagnostic to identify common AI agent adoption risks
+              and get targeted mitigations.
+            </p>
+            <span class="tag">Diagnostic</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Maturity Levels -->
+      <div class="section">
+        <h2>Maturity Levels at a Glance</h2>
+        <table class="level-table">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Name</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span
+                  class="level-badge"
+                  style="background: var(--color-l0)"
+                ></span
+                >0
+              </td>
+              <td>Unaware</td>
+              <td>No intentional agent use. Shadow usage may exist.</td>
+            </tr>
+            <tr>
+              <td>
+                <span
+                  class="level-badge"
+                  style="background: var(--color-l1)"
+                ></span
+                >1
+              </td>
+              <td>Exploratory</td>
+              <td>Individuals experiment. No org-level policy or tooling.</td>
+            </tr>
+            <tr>
+              <td>
+                <span
+                  class="level-badge"
+                  style="background: var(--color-l2)"
+                ></span
+                >2
+              </td>
+              <td>Defined</td>
+              <td>
+                Policies exist. Approved tools listed. Basic guardrails in
+                place.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span
+                  class="level-badge"
+                  style="background: var(--color-l3)"
+                ></span
+                >3
+              </td>
+              <td>Managed</td>
+              <td>
+                Usage instrumented. Metrics collected. Workflows standardized.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span
+                  class="level-badge"
+                  style="background: var(--color-l4)"
+                ></span
+                >4
+              </td>
+              <td>Optimized</td>
+              <td>
+                Agents integrated into CI/CD, IaC, and ops with automated
+                governance.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span
+                  class="level-badge"
+                  style="background: var(--color-l5)"
+                ></span
+                >5
+              </td>
+              <td>Adaptive</td>
+              <td>
+                Continuous tuning via feedback loops and measured outcomes.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 9 Capability Domains -->
+      <div class="section">
+        <h2>9 Capability Domains</h2>
+        <div class="domain-pills">
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-1)"></span
+            >Dev Workflow</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-2)"></span
+            >PR &amp; Code Review</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-3)"></span
+            >CI/CD</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-4)"></span
+            >Infrastructure as Code</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-5)"></span
+            >Ops &amp; Incident Response</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-6)"></span
+            >Security &amp; Compliance</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-7)"></span
+            >Knowledge Management</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-8)"></span
+            >Governance</span
+          >
+          <span class="domain-pill"
+            ><span class="dot" style="background: var(--color-domain-9)"></span
+            >Evaluation &amp; Measurement</span
+          >
+        </div>
+      </div>
+
+      <!-- Documentation -->
+      <div class="section">
+        <h2>Documentation</h2>
+        <ul class="doc-list">
+          <li>
+            <a href="docs/ai-agent-cmm.md">
+              <span class="doc-icon">📘</span>
+              <span
+                >Maturity Model<span class="doc-desc"
+                  >6-level model across 9 capability domains</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="docs/assessment-rubric.md">
+              <span class="doc-icon">📋</span>
+              <span
+                >Assessment Rubric<span class="doc-desc"
+                  >Scoring criteria, evidence checklists, interview
+                  questions</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="docs/reference-architecture.md">
+              <span class="doc-icon">🏗️</span>
+              <span
+                >Reference Architecture<span class="doc-desc"
+                  >Component diagrams &amp; data flows for IDE, CI/CD, Ops</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="docs/roadmap-template.md">
+              <span class="doc-icon">🗺️</span>
+              <span
+                >Adoption Roadmap<span class="doc-desc"
+                  >90-day pilot + 12-month scaling plan</span
+                ></span
+              >
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Templates -->
+      <div class="section">
+        <h2>Ready-to-Use Templates</h2>
+        <ul class="doc-list">
+          <li>
+            <a href="templates/policy-ai-agent-usage.md">
+              <span class="doc-icon">📜</span>
+              <span
+                >AI Agent Usage Policy<span class="doc-desc"
+                  >Acceptable use, data classification, exceptions</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="templates/pr-checklist.md">
+              <span class="doc-icon">✅</span>
+              <span
+                >PR Review Checklist<span class="doc-desc"
+                  >Agent-aware pull request template</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="templates/prompt-library.md">
+              <span class="doc-icon">💬</span>
+              <span
+                >Prompt Library<span class="doc-desc"
+                  >Curated prompts for refactoring, testing, IaC, triage</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="templates/runbook-agent-safety.md">
+              <span class="doc-icon">🛡️</span>
+              <span
+                >Production Safety Runbook<span class="doc-desc"
+                  >10-rule safety framework for agents in ops</span
+                ></span
+              >
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Implementation Examples -->
+      <div class="section">
+        <h2>Implementation Examples</h2>
+        <ul class="doc-list">
+          <li>
+            <a href="examples/repo-structure.md">
+              <span class="doc-icon">📁</span>
+              <span
+                >Repo Structure<span class="doc-desc"
+                  >Recommended layout with agent context files</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="examples/ci-gates/github-actions.yml">
+              <span class="doc-icon">⚙️</span>
+              <span
+                >GitHub Actions CI Gates<span class="doc-desc"
+                  >Agent-specific PR gates workflow</span
+                ></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="examples/ci-gates/gitlab-ci.yml">
+              <span class="doc-icon">⚙️</span>
+              <span
+                >GitLab CI Gates<span class="doc-desc"
+                  >Agent-specific CI pipeline config</span
+                ></span
+              >
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Getting Started -->
+      <div class="section">
+        <h2>Getting Started</h2>
+        <ol style="padding-left: 20px; font-size: 0.9rem; line-height: 1.8">
+          <li>
+            Read the <a href="docs/ai-agent-cmm.md">Maturity Model</a> to
+            understand the levels and domains.
+          </li>
+          <li>
+            Use the <a href="assessment/">Interactive Assessment</a> to score
+            your organization.
+          </li>
+          <li>
+            Identify your lowest-scoring domains &mdash; those are your
+            highest-leverage improvement areas.
+          </li>
+          <li>
+            Copy the <a href="docs/roadmap-template.md">Adoption Roadmap</a> and
+            fill in your org-specific details.
+          </li>
+          <li>
+            Start with Level 2 foundations: publish a
+            <a href="templates/policy-ai-agent-usage.md">usage policy</a> and
+            set up <a href="templates/pr-checklist.md">PR checklists</a>.
+          </li>
+          <li>
+            Add <a href="examples/ci-gates/github-actions.yml">CI gates</a> and
+            telemetry to reach Level 3.
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <p>
+        AI Agent Capability Maturity Model &middot;
+        <a href="https://github.com/jknight137/AICMM">GitHub Repository</a>
+        &middot; Licensed under
+        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,446 +1,677 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Agent Capability Maturity Model -- Executive Summary</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agent Capability Maturity Model -- Executive Summary</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-:root {
-  --color-bg: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-border: #dee2e6;
-  --color-text: #212529;
-  --color-text-muted: #6c757d;
-  --color-primary: #2563eb;
-  --color-primary-light: #dbeafe;
-  --radius: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
-  --color-l0: #94a3b8;
-  --color-l1: #f97316;
-  --color-l2: #eab308;
-  --color-l3: #3b82f6;
-  --color-l4: #8b5cf6;
-  --color-l5: #16a34a;
-  --color-domain-1: #3b82f6;
-  --color-domain-2: #8b5cf6;
-  --color-domain-3: #06b6d4;
-  --color-domain-4: #10b981;
-  --color-domain-5: #f59e0b;
-  --color-domain-6: #ef4444;
-  --color-domain-7: #ec4899;
-  --color-domain-8: #6366f1;
-  --color-domain-9: #14b8a6;
-}
+      :root {
+        --color-bg: #f8f9fa;
+        --color-surface: #ffffff;
+        --color-border: #dee2e6;
+        --color-text: #212529;
+        --color-text-muted: #6c757d;
+        --color-primary: #2563eb;
+        --color-primary-light: #dbeafe;
+        --radius: 8px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-lg:
+          0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        --color-l0: #94a3b8;
+        --color-l1: #f97316;
+        --color-l2: #eab308;
+        --color-l3: #3b82f6;
+        --color-l4: #8b5cf6;
+        --color-l5: #16a34a;
+        --color-domain-1: #3b82f6;
+        --color-domain-2: #8b5cf6;
+        --color-domain-3: #06b6d4;
+        --color-domain-4: #10b981;
+        --color-domain-5: #f59e0b;
+        --color-domain-6: #ef4444;
+        --color-domain-7: #ec4899;
+        --color-domain-8: #6366f1;
+        --color-domain-9: #14b8a6;
+      }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.6;
-}
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+      }
 
-.page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 24px;
-}
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
 
-/* --- Header --- */
-.page-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-.page-header h1 {
-  font-size: 1.75rem;
-  margin-bottom: 8px;
-}
-.page-header .subtitle {
-  font-size: 1rem;
-  color: var(--color-text-muted);
-  max-width: 640px;
-  margin: 0 auto;
-}
+      /* --- Header --- */
+      .page-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .page-header h1 {
+        font-size: 1.75rem;
+        margin-bottom: 8px;
+      }
+      .page-header .subtitle {
+        font-size: 1rem;
+        color: var(--color-text-muted);
+        max-width: 640px;
+        margin: 0 auto;
+      }
 
-/* --- Sections --- */
-.section {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 28px 32px;
-  margin-bottom: 20px;
-}
-.section h2 {
-  font-size: 1.15rem;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
-}
+      /* --- Sections --- */
+      .section {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px 32px;
+        margin-bottom: 20px;
+      }
+      .section h2 {
+        font-size: 1.15rem;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-border);
+      }
 
-/* --- What is the CMM block --- */
-.what-block {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-.what-item h3 {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
-  margin-bottom: 6px;
-}
-.what-item p {
-  font-size: 0.9rem;
-}
+      /* --- What is the CMM block --- */
+      .what-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .what-item h3 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-text-muted);
+        margin-bottom: 6px;
+      }
+      .what-item p {
+        font-size: 0.9rem;
+      }
 
-/* --- Level ladder --- */
-.level-ladder {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.level-row {
-  display: grid;
-  grid-template-columns: 100px 160px 1fr;
-  gap: 0;
-  align-items: stretch;
-  border-bottom: 1px solid var(--color-border);
-}
-.level-row:last-child { border-bottom: none; }
-.level-num {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
-  padding: 16px 12px;
-}
-.level-name {
-  display: flex;
-  align-items: center;
-  padding: 16px 16px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  border-right: 1px solid var(--color-border);
-}
-.level-desc {
-  display: flex;
-  align-items: center;
-  padding: 16px 16px;
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-}
+      /* --- Level ladder --- */
+      .level-ladder {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .level-row {
+        display: grid;
+        grid-template-columns: 100px 160px 1fr;
+        gap: 0;
+        align-items: stretch;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .level-row:last-child {
+        border-bottom: none;
+      }
+      .level-num {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        padding: 16px 12px;
+      }
+      .level-name {
+        display: flex;
+        align-items: center;
+        padding: 16px 16px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-right: 1px solid var(--color-border);
+      }
+      .level-desc {
+        display: flex;
+        align-items: center;
+        padding: 16px 16px;
+        font-size: 0.88rem;
+        color: var(--color-text-muted);
+      }
 
-/* --- Domain grid --- */
-.domain-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.domain-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 16px;
-  border-top: 3px solid;
-}
-.domain-card .domain-num {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  margin-bottom: 2px;
-}
-.domain-card h3 {
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-.domain-card p {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
+      /* --- Domain grid --- */
+      .domain-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .domain-card {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        padding: 16px;
+        border-top: 3px solid;
+      }
+      .domain-card .domain-num {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        margin-bottom: 2px;
+      }
+      .domain-card h3 {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+      }
+      .domain-card p {
+        font-size: 0.82rem;
+        color: var(--color-text-muted);
+        line-height: 1.5;
+      }
 
-/* --- Key principles --- */
-.principles-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 24px;
-  list-style: none;
-}
-.principles-list li {
-  font-size: 0.9rem;
-  padding-left: 20px;
-  position: relative;
-}
-.principles-list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 9px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-primary);
-}
+      /* --- Key principles --- */
+      .principles-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 24px;
+        list-style: none;
+      }
+      .principles-list li {
+        font-size: 0.9rem;
+        padding-left: 20px;
+        position: relative;
+      }
+      .principles-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 9px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--color-primary);
+      }
 
-/* --- Getting started --- */
-.steps-list {
-  counter-reset: steps;
-  list-style: none;
-}
-.steps-list li {
-  counter-increment: steps;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  margin-bottom: 12px;
-  font-size: 0.9rem;
-}
-.steps-list li::before {
-  content: counter(steps);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-weight: 700;
-  font-size: 0.85rem;
-}
+      /* --- Getting started --- */
+      .steps-list {
+        counter-reset: steps;
+        list-style: none;
+      }
+      .steps-list li {
+        counter-increment: steps;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+      }
+      .steps-list li::before {
+        content: counter(steps);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-primary-light);
+        color: var(--color-primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
 
-/* --- Footer / actions --- */
-.actions-bar {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 24px;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 22px;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-.btn-primary { background: var(--color-primary); color: #fff; }
-.btn-primary:hover { background: #1d4ed8; }
-.btn-secondary { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); }
-.btn-secondary:hover { background: var(--color-bg); }
+      /* --- Footer / actions --- */
+      .actions-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 24px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+      .btn-primary {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #1d4ed8;
+      }
+      .btn-secondary {
+        background: var(--color-surface);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+      }
+      .btn-secondary:hover {
+        background: var(--color-bg);
+      }
 
-/* --- Responsive --- */
-@media (max-width: 640px) {
-  .page { padding: 16px 12px; }
-  .section { padding: 20px 16px; }
-  .what-block { grid-template-columns: 1fr; }
-  .level-row { grid-template-columns: 60px 100px 1fr; }
-  .level-num { font-size: 1.2rem; padding: 12px 8px; }
-  .level-name { font-size: 0.85rem; padding: 12px 10px; }
-  .level-desc { font-size: 0.8rem; padding: 12px 10px; }
-  .domain-grid { grid-template-columns: 1fr; }
-  .principles-list { grid-template-columns: 1fr; }
-  .actions-bar { flex-direction: column; align-items: stretch; text-align: center; }
-}
+      /* --- Responsive --- */
+      @media (max-width: 640px) {
+        .page {
+          padding: 16px 12px;
+        }
+        .section {
+          padding: 20px 16px;
+        }
+        .what-block {
+          grid-template-columns: 1fr;
+        }
+        .level-row {
+          grid-template-columns: 60px 100px 1fr;
+        }
+        .level-num {
+          font-size: 1.2rem;
+          padding: 12px 8px;
+        }
+        .level-name {
+          font-size: 0.85rem;
+          padding: 12px 10px;
+        }
+        .level-desc {
+          font-size: 0.8rem;
+          padding: 12px 10px;
+        }
+        .domain-grid {
+          grid-template-columns: 1fr;
+        }
+        .principles-list {
+          grid-template-columns: 1fr;
+        }
+        .actions-bar {
+          flex-direction: column;
+          align-items: stretch;
+          text-align: center;
+        }
+      }
 
-/* --- Print --- */
-@media print {
-  body { background: #fff; }
-  .page { padding: 0; max-width: none; }
-  .section { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; margin-bottom: 12px; padding: 16px 20px; }
-  .actions-bar { display: none; }
-  .page-header { margin-bottom: 16px; }
-  .page-header h1 { font-size: 1.4rem; }
-  .domain-grid { grid-template-columns: repeat(3, 1fr); }
-}
-</style>
-</head>
-<body>
+      /* --- Print --- */
+      @media print {
+        body {
+          background: #fff;
+        }
+        .page {
+          padding: 0;
+          max-width: none;
+        }
+        .section {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          break-inside: avoid;
+          margin-bottom: 12px;
+          padding: 16px 20px;
+        }
+        .actions-bar {
+          display: none;
+        }
+        .page-header {
+          margin-bottom: 16px;
+        }
+        .page-header h1 {
+          font-size: 1.4rem;
+        }
+        .domain-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .site-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--color-border);
+        padding: 8px 20px;
+        font-size: 0.82rem;
+      }
+      .site-nav a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .site-nav a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site-nav"><a href="../">&larr; AI-CMM Home</a></nav>
 
-<div class="page">
-  <div class="page-header">
-    <h1>AI Agent Capability Maturity Model</h1>
-    <p class="subtitle">A structured framework for adopting AI coding agents across the software development lifecycle -- safely, measurably, and at scale.</p>
-  </div>
-
-  <!-- What is the CMM -->
-  <div class="section">
-    <h2>What is this?</h2>
-    <div class="what-block">
-      <div class="what-item">
-        <h3>Purpose</h3>
-        <p>A maturity model that helps organizations adopt AI agents (Copilot, Claude Code, Cursor, Codex, and similar tools) deliberately rather than by uncontrolled adoption or blanket prohibition. It provides a structured path from initial experimentation to optimized, governed usage.</p>
+    <div class="page">
+      <div class="page-header">
+        <h1>AI Agent Capability Maturity Model</h1>
+        <p class="subtitle">
+          A structured framework for adopting AI coding agents across the
+          software development lifecycle -- safely, measurably, and at scale.
+        </p>
       </div>
-      <div class="what-item">
-        <h3>Scope</h3>
-        <p>Covers the full software development lifecycle: local development, code review, CI/CD, infrastructure as code, operations, security, knowledge management, governance, and measurement. Platform-agnostic -- works with any cloud, SCM, or CI/CD platform.</p>
+
+      <!-- What is the CMM -->
+      <div class="section">
+        <h2>What is this?</h2>
+        <div class="what-block">
+          <div class="what-item">
+            <h3>Purpose</h3>
+            <p>
+              A maturity model that helps organizations adopt AI agents
+              (Copilot, Claude Code, Cursor, Codex, and similar tools)
+              deliberately rather than by uncontrolled adoption or blanket
+              prohibition. It provides a structured path from initial
+              experimentation to optimized, governed usage.
+            </p>
+          </div>
+          <div class="what-item">
+            <h3>Scope</h3>
+            <p>
+              Covers the full software development lifecycle: local development,
+              code review, CI/CD, infrastructure as code, operations, security,
+              knowledge management, governance, and measurement.
+              Platform-agnostic -- works with any cloud, SCM, or CI/CD platform.
+            </p>
+          </div>
+          <div class="what-item">
+            <h3>Who should use it</h3>
+            <p>
+              Engineering leadership, platform teams, security teams, and
+              governance bodies responsible for AI agent adoption decisions.
+              Useful for organizations of any size that want to move beyond ad
+              hoc agent usage.
+            </p>
+          </div>
+          <div class="what-item">
+            <h3>What you get</h3>
+            <p>
+              A current-state assessment score (0-5) across 9 domains,
+              identification of critical gaps and risks, and a tailored 90-day
+              improvement plan with specific actions and milestones.
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="what-item">
-        <h3>Who should use it</h3>
-        <p>Engineering leadership, platform teams, security teams, and governance bodies responsible for AI agent adoption decisions. Useful for organizations of any size that want to move beyond ad hoc agent usage.</p>
+
+      <!-- Maturity levels -->
+      <div class="section">
+        <h2>Maturity Levels</h2>
+        <div class="level-ladder">
+          <div class="level-row">
+            <div class="level-num" style="background: var(--color-l5)">5</div>
+            <div class="level-name">Adaptive</div>
+            <div class="level-desc">
+              The org continuously tunes agent behavior, context, and guardrails
+              using feedback loops and measured outcomes. Proactive capabilities
+              and industry leadership.
+            </div>
+          </div>
+          <div class="level-row">
+            <div class="level-num" style="background: var(--color-l4)">4</div>
+            <div class="level-name">Optimized</div>
+            <div class="level-desc">
+              Agents are integrated into CI/CD, IaC, and ops workflows with
+              automated governance. Policy-as-code enforcement. Full KPI
+              coverage and ROI analysis.
+            </div>
+          </div>
+          <div class="level-row">
+            <div class="level-num" style="background: var(--color-l3)">3</div>
+            <div class="level-name">Managed</div>
+            <div class="level-desc">
+              Agent usage is instrumented. Metrics are collected and reviewed.
+              Workflows are standardized with templates and reusable components.
+            </div>
+          </div>
+          <div class="level-row">
+            <div class="level-num" style="background: var(--color-l2)">2</div>
+            <div class="level-name">Defined</div>
+            <div class="level-desc">
+              Policies exist. Approved tools are listed. Basic guardrails are in
+              place. This is the minimum safe level for expanding agent usage.
+            </div>
+          </div>
+          <div class="level-row">
+            <div class="level-num" style="background: var(--color-l1)">1</div>
+            <div class="level-name">Exploratory</div>
+            <div class="level-desc">
+              Individuals experiment with AI agents. No org-level policy or
+              tooling. Usage is ungoverned and risk is unmanaged.
+            </div>
+          </div>
+          <div class="level-row">
+            <div class="level-num" style="background: var(--color-l0)">0</div>
+            <div class="level-name">Unaware</div>
+            <div class="level-desc">
+              No intentional use of AI agents. Shadow usage may exist without
+              organizational awareness.
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="what-item">
-        <h3>What you get</h3>
-        <p>A current-state assessment score (0-5) across 9 domains, identification of critical gaps and risks, and a tailored 90-day improvement plan with specific actions and milestones.</p>
+
+      <!-- 9 Domains -->
+      <div class="section">
+        <h2>9 Capability Domains</h2>
+        <div class="domain-grid">
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-1)"
+          >
+            <div class="domain-num">Domain 1</div>
+            <h3>Dev Workflow</h3>
+            <p>
+              How agents are used during local development: IDE integration, dev
+              environments, CLI tooling, and configuration.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-2)"
+          >
+            <div class="domain-num">Domain 2</div>
+            <h3>PR and Code Review</h3>
+            <p>
+              How agent-generated code is disclosed, reviewed, labeled, and
+              merged. Review rigor and quality tracking.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-3)"
+          >
+            <div class="domain-num">Domain 3</div>
+            <h3>CI/CD</h3>
+            <p>
+              How agents participate in build, test, and deploy pipelines.
+              Isolation, auditability, and pipeline standards.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-4)"
+          >
+            <div class="domain-num">Domain 4</div>
+            <h3>Infrastructure as Code</h3>
+            <p>
+              How agents generate, modify, and validate IaC. Module registries,
+              policy-as-code, and drift detection.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-5)"
+          >
+            <div class="domain-num">Domain 5</div>
+            <h3>Ops and Incident Response</h3>
+            <p>
+              How agents assist during incidents, runbooks, and operational
+              tasks. Safety rules and remediation boundaries.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-6)"
+          >
+            <div class="domain-num">Domain 6</div>
+            <h3>Security and Compliance</h3>
+            <p>
+              How agent usage meets security policies, data classification, and
+              regulatory requirements. DLP and audit.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-7)"
+          >
+            <div class="domain-num">Domain 7</div>
+            <h3>Knowledge Management</h3>
+            <p>
+              How agents consume and contribute to documentation, ADRs, and
+              organizational context. RAG and knowledge bases.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-8)"
+          >
+            <div class="domain-num">Domain 8</div>
+            <h3>Governance</h3>
+            <p>
+              How the org manages agent access, approvals, audit, cost tracking,
+              and exceptions. Policy enforcement.
+            </p>
+          </div>
+          <div
+            class="domain-card"
+            style="border-top-color: var(--color-domain-9)"
+          >
+            <div class="domain-num">Domain 9</div>
+            <h3>Evaluation and Measurement</h3>
+            <p>
+              How the org measures agent value, code quality, ROI, and risk. KPI
+              definitions and decision-driven metrics.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key principles -->
+      <div class="section">
+        <h2>Key Principles</h2>
+        <ul class="principles-list">
+          <li>
+            A domain earns a level only if all required practices for that level
+            are in place. No skipping levels.
+          </li>
+          <li>
+            Security and Compliance must reach Level 2 before expanding agent
+            usage. No exceptions.
+          </li>
+          <li>
+            Governance must reach Level 2 for other domain scores to be
+            reliable.
+          </li>
+          <li>
+            Any domain 2+ levels below the overall average is a critical gap
+            requiring immediate attention.
+          </li>
+          <li>
+            Regulated environments (FedRAMP, HIPAA, PCI-DSS, GDPR) must be
+            assessed separately if tooling differs.
+          </li>
+          <li>
+            The model is platform-agnostic. Adapt it to your cloud, SCM, CI/CD,
+            and tooling stack.
+          </li>
+          <li>
+            10 categories of high-risk changes always require human review
+            regardless of maturity level.
+          </li>
+          <li>
+            Measurement without action is waste. Every KPI should have an owner
+            and a decision threshold.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Getting started -->
+      <div class="section">
+        <h2>Getting Started</h2>
+        <ol class="steps-list">
+          <li>
+            Assemble a cross-functional assessment team: engineering, security,
+            platform, and compliance representatives.
+          </li>
+          <li>
+            Complete the interactive assessment -- score each of the 9 domains
+            from Level 0 to Level 5 using the evidence checklists and interview
+            questions provided.
+          </li>
+          <li>
+            Review the results dashboard: overall score, radar chart, critical
+            gaps, and security/governance warnings.
+          </li>
+          <li>
+            Use the generated 90-day improvement plan to prioritize your first
+            actions, starting with governance and security foundations.
+          </li>
+          <li>
+            After the 90-day cycle, reassess to measure progress and set targets
+            for the next cycle.
+          </li>
+        </ol>
+      </div>
+
+      <!-- Artifacts included -->
+      <div class="section">
+        <h2>What the CMM Includes</h2>
+        <div class="what-block">
+          <div class="what-item">
+            <h3>Assessment rubric</h3>
+            <p>
+              Scoring criteria for all 9 domains across 6 levels, with evidence
+              checklists and interview questions for each domain.
+            </p>
+          </div>
+          <div class="what-item">
+            <h3>Interactive assessment tool</h3>
+            <p>
+              Self-contained web tool that walks you through the assessment,
+              visualizes results, and generates a tailored improvement plan.
+            </p>
+          </div>
+          <div class="what-item">
+            <h3>Roadmap templates</h3>
+            <p>
+              90-day and 12-month adoption plans with week-by-week actions, KPI
+              targets, and milestone checklists.
+            </p>
+          </div>
+          <div class="what-item">
+            <h3>Policy and process templates</h3>
+            <p>
+              Ready-to-customize templates for acceptable use policy, PR
+              checklists, runbook safety rules, and governance charters.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <a class="btn btn-primary" href="../assessment/">Take the Assessment</a>
+        <button class="btn btn-secondary" onclick="window.print()">
+          Print This Page
+        </button>
       </div>
     </div>
-  </div>
-
-  <!-- Maturity levels -->
-  <div class="section">
-    <h2>Maturity Levels</h2>
-    <div class="level-ladder">
-      <div class="level-row">
-        <div class="level-num" style="background:var(--color-l5)">5</div>
-        <div class="level-name">Adaptive</div>
-        <div class="level-desc">The org continuously tunes agent behavior, context, and guardrails using feedback loops and measured outcomes. Proactive capabilities and industry leadership.</div>
-      </div>
-      <div class="level-row">
-        <div class="level-num" style="background:var(--color-l4)">4</div>
-        <div class="level-name">Optimized</div>
-        <div class="level-desc">Agents are integrated into CI/CD, IaC, and ops workflows with automated governance. Policy-as-code enforcement. Full KPI coverage and ROI analysis.</div>
-      </div>
-      <div class="level-row">
-        <div class="level-num" style="background:var(--color-l3)">3</div>
-        <div class="level-name">Managed</div>
-        <div class="level-desc">Agent usage is instrumented. Metrics are collected and reviewed. Workflows are standardized with templates and reusable components.</div>
-      </div>
-      <div class="level-row">
-        <div class="level-num" style="background:var(--color-l2)">2</div>
-        <div class="level-name">Defined</div>
-        <div class="level-desc">Policies exist. Approved tools are listed. Basic guardrails are in place. This is the minimum safe level for expanding agent usage.</div>
-      </div>
-      <div class="level-row">
-        <div class="level-num" style="background:var(--color-l1)">1</div>
-        <div class="level-name">Exploratory</div>
-        <div class="level-desc">Individuals experiment with AI agents. No org-level policy or tooling. Usage is ungoverned and risk is unmanaged.</div>
-      </div>
-      <div class="level-row">
-        <div class="level-num" style="background:var(--color-l0)">0</div>
-        <div class="level-name">Unaware</div>
-        <div class="level-desc">No intentional use of AI agents. Shadow usage may exist without organizational awareness.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 9 Domains -->
-  <div class="section">
-    <h2>9 Capability Domains</h2>
-    <div class="domain-grid">
-      <div class="domain-card" style="border-top-color:var(--color-domain-1)">
-        <div class="domain-num">Domain 1</div>
-        <h3>Dev Workflow</h3>
-        <p>How agents are used during local development: IDE integration, dev environments, CLI tooling, and configuration.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-2)">
-        <div class="domain-num">Domain 2</div>
-        <h3>PR and Code Review</h3>
-        <p>How agent-generated code is disclosed, reviewed, labeled, and merged. Review rigor and quality tracking.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-3)">
-        <div class="domain-num">Domain 3</div>
-        <h3>CI/CD</h3>
-        <p>How agents participate in build, test, and deploy pipelines. Isolation, auditability, and pipeline standards.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-4)">
-        <div class="domain-num">Domain 4</div>
-        <h3>Infrastructure as Code</h3>
-        <p>How agents generate, modify, and validate IaC. Module registries, policy-as-code, and drift detection.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-5)">
-        <div class="domain-num">Domain 5</div>
-        <h3>Ops and Incident Response</h3>
-        <p>How agents assist during incidents, runbooks, and operational tasks. Safety rules and remediation boundaries.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-6)">
-        <div class="domain-num">Domain 6</div>
-        <h3>Security and Compliance</h3>
-        <p>How agent usage meets security policies, data classification, and regulatory requirements. DLP and audit.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-7)">
-        <div class="domain-num">Domain 7</div>
-        <h3>Knowledge Management</h3>
-        <p>How agents consume and contribute to documentation, ADRs, and organizational context. RAG and knowledge bases.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-8)">
-        <div class="domain-num">Domain 8</div>
-        <h3>Governance</h3>
-        <p>How the org manages agent access, approvals, audit, cost tracking, and exceptions. Policy enforcement.</p>
-      </div>
-      <div class="domain-card" style="border-top-color:var(--color-domain-9)">
-        <div class="domain-num">Domain 9</div>
-        <h3>Evaluation and Measurement</h3>
-        <p>How the org measures agent value, code quality, ROI, and risk. KPI definitions and decision-driven metrics.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Key principles -->
-  <div class="section">
-    <h2>Key Principles</h2>
-    <ul class="principles-list">
-      <li>A domain earns a level only if all required practices for that level are in place. No skipping levels.</li>
-      <li>Security and Compliance must reach Level 2 before expanding agent usage. No exceptions.</li>
-      <li>Governance must reach Level 2 for other domain scores to be reliable.</li>
-      <li>Any domain 2+ levels below the overall average is a critical gap requiring immediate attention.</li>
-      <li>Regulated environments (FedRAMP, HIPAA, PCI-DSS, GDPR) must be assessed separately if tooling differs.</li>
-      <li>The model is platform-agnostic. Adapt it to your cloud, SCM, CI/CD, and tooling stack.</li>
-      <li>10 categories of high-risk changes always require human review regardless of maturity level.</li>
-      <li>Measurement without action is waste. Every KPI should have an owner and a decision threshold.</li>
-    </ul>
-  </div>
-
-  <!-- Getting started -->
-  <div class="section">
-    <h2>Getting Started</h2>
-    <ol class="steps-list">
-      <li>Assemble a cross-functional assessment team: engineering, security, platform, and compliance representatives.</li>
-      <li>Complete the interactive assessment -- score each of the 9 domains from Level 0 to Level 5 using the evidence checklists and interview questions provided.</li>
-      <li>Review the results dashboard: overall score, radar chart, critical gaps, and security/governance warnings.</li>
-      <li>Use the generated 90-day improvement plan to prioritize your first actions, starting with governance and security foundations.</li>
-      <li>After the 90-day cycle, reassess to measure progress and set targets for the next cycle.</li>
-    </ol>
-  </div>
-
-  <!-- Artifacts included -->
-  <div class="section">
-    <h2>What the CMM Includes</h2>
-    <div class="what-block">
-      <div class="what-item">
-        <h3>Assessment rubric</h3>
-        <p>Scoring criteria for all 9 domains across 6 levels, with evidence checklists and interview questions for each domain.</p>
-      </div>
-      <div class="what-item">
-        <h3>Interactive assessment tool</h3>
-        <p>Self-contained web tool that walks you through the assessment, visualizes results, and generates a tailored improvement plan.</p>
-      </div>
-      <div class="what-item">
-        <h3>Roadmap templates</h3>
-        <p>90-day and 12-month adoption plans with week-by-week actions, KPI targets, and milestone checklists.</p>
-      </div>
-      <div class="what-item">
-        <h3>Policy and process templates</h3>
-        <p>Ready-to-customize templates for acceptable use policy, PR checklists, runbook safety rules, and governance charters.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="actions-bar">
-    <a class="btn btn-primary" href="../assessment/">Take the Assessment</a>
-    <button class="btn btn-secondary" onclick="window.print()">Print This Page</button>
-  </div>
-</div>
-
-</body>
+  </body>
 </html>

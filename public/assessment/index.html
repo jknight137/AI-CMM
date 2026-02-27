@@ -1,1842 +1,2791 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Agent Capability Maturity Model -- Interactive Assessment</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agent Capability Maturity Model -- Interactive Assessment</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-:root {
-  --color-bg: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-border: #dee2e6;
-  --color-text: #212529;
-  --color-text-muted: #6c757d;
-  --color-primary: #2563eb;
-  --color-primary-light: #dbeafe;
-  --color-red: #dc2626;
-  --color-red-light: #fef2f2;
-  --color-yellow: #d97706;
-  --color-yellow-light: #fffbeb;
-  --color-green: #16a34a;
-  --color-green-light: #f0fdf4;
-  --color-domain-1: #3b82f6;
-  --color-domain-2: #8b5cf6;
-  --color-domain-3: #06b6d4;
-  --color-domain-4: #10b981;
-  --color-domain-5: #f59e0b;
-  --color-domain-6: #ef4444;
-  --color-domain-7: #ec4899;
-  --color-domain-8: #6366f1;
-  --color-domain-9: #14b8a6;
-  --radius: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
-  --transition: 0.2s ease;
-}
+      :root {
+        --color-bg: #f8f9fa;
+        --color-surface: #ffffff;
+        --color-border: #dee2e6;
+        --color-text: #212529;
+        --color-text-muted: #6c757d;
+        --color-primary: #2563eb;
+        --color-primary-light: #dbeafe;
+        --color-red: #dc2626;
+        --color-red-light: #fef2f2;
+        --color-yellow: #d97706;
+        --color-yellow-light: #fffbeb;
+        --color-green: #16a34a;
+        --color-green-light: #f0fdf4;
+        --color-domain-1: #3b82f6;
+        --color-domain-2: #8b5cf6;
+        --color-domain-3: #06b6d4;
+        --color-domain-4: #10b981;
+        --color-domain-5: #f59e0b;
+        --color-domain-6: #ef4444;
+        --color-domain-7: #ec4899;
+        --color-domain-8: #6366f1;
+        --color-domain-9: #14b8a6;
+        --radius: 8px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-lg:
+          0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        --transition: 0.2s ease;
+      }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.6;
-  min-height: 100vh;
-}
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
 
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px 20px;
-}
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
 
-/* --- Header --- */
-.header {
-  text-align: center;
-  padding: 16px 0 8px;
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 24px;
-}
-.header h1 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  letter-spacing: 0.02em;
-}
+      /* --- Header --- */
+      .header {
+        text-align: center;
+        padding: 16px 0 8px;
+        border-bottom: 1px solid var(--color-border);
+        margin-bottom: 24px;
+      }
+      .header h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        letter-spacing: 0.02em;
+      }
 
-/* --- Screen visibility --- */
-.screen { display: none; }
-.screen.active { display: block; }
+      /* --- Screen visibility --- */
+      .screen {
+        display: none;
+      }
+      .screen.active {
+        display: block;
+      }
 
-/* --- Welcome screen --- */
-.welcome-card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 48px 40px;
-  text-align: center;
-  max-width: 680px;
-  margin: 40px auto;
-}
-.welcome-card h2 {
-  font-size: 1.75rem;
-  margin-bottom: 16px;
-  color: var(--color-text);
-}
-.welcome-card p {
-  color: var(--color-text-muted);
-  margin-bottom: 12px;
-  font-size: 0.95rem;
-}
-.welcome-card .domains-preview {
-  text-align: left;
-  margin: 24px 0;
-  padding: 20px 24px;
-  background: var(--color-bg);
-  border-radius: var(--radius);
-}
-.welcome-card .domains-preview h3 {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-  margin-bottom: 12px;
-}
-.welcome-card .domains-preview ol {
-  padding-left: 20px;
-  font-size: 0.9rem;
-  columns: 2;
-  column-gap: 24px;
-}
-.welcome-card .domains-preview li {
-  margin-bottom: 4px;
-}
+      /* --- Welcome screen --- */
+      .welcome-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        padding: 48px 40px;
+        text-align: center;
+        max-width: 680px;
+        margin: 40px auto;
+      }
+      .welcome-card h2 {
+        font-size: 1.75rem;
+        margin-bottom: 16px;
+        color: var(--color-text);
+      }
+      .welcome-card p {
+        color: var(--color-text-muted);
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+      }
+      .welcome-card .domains-preview {
+        text-align: left;
+        margin: 24px 0;
+        padding: 20px 24px;
+        background: var(--color-bg);
+        border-radius: var(--radius);
+      }
+      .welcome-card .domains-preview h3 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-text-muted);
+        margin-bottom: 12px;
+      }
+      .welcome-card .domains-preview ol {
+        padding-left: 20px;
+        font-size: 0.9rem;
+        columns: 2;
+        column-gap: 24px;
+      }
+      .welcome-card .domains-preview li {
+        margin-bottom: 4px;
+      }
 
-/* --- Buttons --- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 28px;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition);
-  text-decoration: none;
-}
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
-}
-.btn-primary:hover { background: #1d4ed8; }
-.btn-secondary {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-.btn-secondary:hover { background: var(--color-bg); }
-.btn-sm { padding: 8px 16px; font-size: 0.85rem; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
+      /* --- Buttons --- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #1d4ed8;
+      }
+      .btn-secondary {
+        background: var(--color-surface);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+      }
+      .btn-secondary:hover {
+        background: var(--color-bg);
+      }
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
 
-/* --- Progress bar --- */
-.progress-container {
-  margin-bottom: 24px;
-}
-.progress-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-.progress-bar-bg {
-  height: 6px;
-  background: var(--color-border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.progress-bar-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 3px;
-  transition: width 0.4s ease;
-}
+      /* --- Progress bar --- */
+      .progress-container {
+        margin-bottom: 24px;
+      }
+      .progress-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+      }
+      .progress-bar-bg {
+        height: 6px;
+        background: var(--color-border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--color-primary);
+        border-radius: 3px;
+        transition: width 0.4s ease;
+      }
 
-/* --- Assessment cards --- */
-.assessment-card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 32px;
-  margin-bottom: 24px;
-}
-.domain-header {
-  margin-bottom: 20px;
-}
-.domain-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 8px;
-}
-.domain-header h2 {
-  font-size: 1.35rem;
-  margin-bottom: 6px;
-}
-.domain-header p {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
+      /* --- Assessment cards --- */
+      .assessment-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 32px;
+        margin-bottom: 24px;
+      }
+      .domain-header {
+        margin-bottom: 20px;
+      }
+      .domain-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 8px;
+      }
+      .domain-header h2 {
+        font-size: 1.35rem;
+        margin-bottom: 6px;
+      }
+      .domain-header p {
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+      }
 
-/* --- Level selector --- */
-.level-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 20px 0;
-}
-.level-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all var(--transition);
-  background: var(--color-surface);
-}
-.level-option:hover {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-.level-option.selected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-.level-option input[type="radio"] {
-  margin-top: 3px;
-  accent-color: var(--color-primary);
-  flex-shrink: 0;
-}
-.level-option .level-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 2px;
-}
-.level-option .level-criteria {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
+      /* --- Level selector --- */
+      .level-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 20px 0;
+      }
+      .level-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all var(--transition);
+        background: var(--color-surface);
+      }
+      .level-option:hover {
+        border-color: var(--color-primary);
+        background: var(--color-primary-light);
+      }
+      .level-option.selected {
+        border-color: var(--color-primary);
+        background: var(--color-primary-light);
+      }
+      .level-option input[type="radio"] {
+        margin-top: 3px;
+        accent-color: var(--color-primary);
+        flex-shrink: 0;
+      }
+      .level-option .level-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+      }
+      .level-option .level-criteria {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        line-height: 1.5;
+      }
 
-/* --- Evidence hints --- */
-.evidence-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 8px 0;
-  font-weight: 500;
-}
-.evidence-toggle .arrow {
-  transition: transform var(--transition);
-  font-size: 0.7rem;
-}
-.evidence-toggle.open .arrow {
-  transform: rotate(90deg);
-}
-.evidence-content {
-  display: none;
-  padding: 16px;
-  background: var(--color-bg);
-  border-radius: var(--radius);
-  margin-top: 8px;
-  font-size: 0.85rem;
-}
-.evidence-content.open { display: block; }
-.evidence-content ul {
-  padding-left: 20px;
-  margin: 0;
-}
-.evidence-content li {
-  margin-bottom: 4px;
-  color: var(--color-text-muted);
-}
+      /* --- Evidence hints --- */
+      .evidence-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: none;
+        color: var(--color-primary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 8px 0;
+        font-weight: 500;
+      }
+      .evidence-toggle .arrow {
+        transition: transform var(--transition);
+        font-size: 0.7rem;
+      }
+      .evidence-toggle.open .arrow {
+        transform: rotate(90deg);
+      }
+      .evidence-content {
+        display: none;
+        padding: 16px;
+        background: var(--color-bg);
+        border-radius: var(--radius);
+        margin-top: 8px;
+        font-size: 0.85rem;
+      }
+      .evidence-content.open {
+        display: block;
+      }
+      .evidence-content ul {
+        padding-left: 20px;
+        margin: 0;
+      }
+      .evidence-content li {
+        margin-bottom: 4px;
+        color: var(--color-text-muted);
+      }
 
-/* --- Navigation --- */
-.nav-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
-}
+      /* --- Navigation --- */
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 16px;
+      }
 
-/* --- Results screen --- */
-.results-section {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 28px 32px;
-  margin-bottom: 20px;
-}
-.results-section h2 {
-  font-size: 1.2rem;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
-}
-.results-section h3 {
-  font-size: 1rem;
-  margin: 16px 0 8px;
-}
+      /* --- Results screen --- */
+      .results-section {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px 32px;
+        margin-bottom: 20px;
+      }
+      .results-section h2 {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .results-section h3 {
+        font-size: 1rem;
+        margin: 16px 0 8px;
+      }
 
-/* --- Overall score --- */
-.overall-score {
-  text-align: center;
-  padding: 24px;
-  margin-bottom: 20px;
-}
-.overall-score .score-value {
-  font-size: 3rem;
-  font-weight: 700;
-  line-height: 1;
-}
-.overall-score .score-label {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  margin-top: 4px;
-}
-.overall-score .score-interpretation {
-  margin-top: 12px;
-  font-size: 0.95rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.interpretation-title {
-  font-weight: 700;
-  margin-bottom: 4px;
-}
+      /* --- Overall score --- */
+      .overall-score {
+        text-align: center;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+      .overall-score .score-value {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .overall-score .score-label {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        margin-top: 4px;
+      }
+      .overall-score .score-interpretation {
+        margin-top: 12px;
+        font-size: 0.95rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .interpretation-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
 
-/* --- Score table --- */
-.score-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-.score-table th, .score-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-.score-table th {
-  font-weight: 600;
-  color: var(--color-text-muted);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.score-table .score-cell {
-  font-weight: 700;
-  text-align: center;
-  width: 80px;
-}
-.score-table .level-name-cell {
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-}
-.score-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 6px;
-  vertical-align: middle;
-}
+      /* --- Score table --- */
+      .score-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+      .score-table th,
+      .score-table td {
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .score-table th {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .score-table .score-cell {
+        font-weight: 700;
+        text-align: center;
+        width: 80px;
+      }
+      .score-table .level-name-cell {
+        color: var(--color-text-muted);
+        font-size: 0.85rem;
+      }
+      .score-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
 
-/* --- Warnings / callouts --- */
-.callout {
-  padding: 16px 20px;
-  border-radius: var(--radius);
-  margin: 16px 0;
-  font-size: 0.9rem;
-  border-left: 4px solid;
-}
-.callout-red {
-  background: var(--color-red-light);
-  border-color: var(--color-red);
-  color: #991b1b;
-}
-.callout-yellow {
-  background: var(--color-yellow-light);
-  border-color: var(--color-yellow);
-  color: #92400e;
-}
-.callout-green {
-  background: var(--color-green-light);
-  border-color: var(--color-green);
-  color: #166534;
-}
-.callout strong { display: block; margin-bottom: 4px; }
+      /* --- Warnings / callouts --- */
+      .callout {
+        padding: 16px 20px;
+        border-radius: var(--radius);
+        margin: 16px 0;
+        font-size: 0.9rem;
+        border-left: 4px solid;
+      }
+      .callout-red {
+        background: var(--color-red-light);
+        border-color: var(--color-red);
+        color: #991b1b;
+      }
+      .callout-yellow {
+        background: var(--color-yellow-light);
+        border-color: var(--color-yellow);
+        color: #92400e;
+      }
+      .callout-green {
+        background: var(--color-green-light);
+        border-color: var(--color-green);
+        color: #166534;
+      }
+      .callout strong {
+        display: block;
+        margin-bottom: 4px;
+      }
 
-/* --- Radar chart --- */
-.chart-container {
-  display: flex;
-  justify-content: center;
-  padding: 16px 0;
-}
-.chart-container canvas {
-  max-width: 100%;
-  height: auto;
-}
+      /* --- Radar chart --- */
+      .chart-container {
+        display: flex;
+        justify-content: center;
+        padding: 16px 0;
+      }
+      .chart-container canvas {
+        max-width: 100%;
+        height: auto;
+      }
 
-/* --- 90-day plan --- */
-.plan-phase {
-  margin-bottom: 20px;
-}
-.plan-phase h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  background: var(--color-bg);
-  border-radius: var(--radius);
-}
-.plan-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-.plan-table th, .plan-table td {
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-.plan-table th {
-  font-weight: 600;
-  color: var(--color-text-muted);
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.priority-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  margin-right: 6px;
-}
-.priority-1 { background: var(--color-red); }
-.priority-2 { background: var(--color-yellow); }
-.priority-3 { background: var(--color-primary); }
+      /* --- 90-day plan --- */
+      .plan-phase {
+        margin-bottom: 20px;
+      }
+      .plan-phase h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background: var(--color-bg);
+        border-radius: var(--radius);
+      }
+      .plan-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      .plan-table th,
+      .plan-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .plan-table th {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .priority-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #fff;
+        margin-right: 6px;
+      }
+      .priority-1 {
+        background: var(--color-red);
+      }
+      .priority-2 {
+        background: var(--color-yellow);
+      }
+      .priority-3 {
+        background: var(--color-primary);
+      }
 
-/* --- Export buttons --- */
-.export-bar {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 16px 0;
-}
+      /* --- Export buttons --- */
+      .export-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 16px 0;
+      }
 
-/* --- Toast --- */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #1e293b;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(80px);
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 1000;
-}
-.toast.show {
-  transform: translateY(0);
-  opacity: 1;
-}
+      /* --- Toast --- */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #1e293b;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
 
-/* --- Tabs --- */
-.tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--color-border);
-  margin-bottom: 20px;
-}
-.tab-btn {
-  padding: 10px 20px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  transition: all var(--transition);
-}
-.tab-btn.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
+      /* --- Tabs --- */
+      .tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 2px solid var(--color-border);
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-text-muted);
+        transition: all var(--transition);
+      }
+      .tab-btn.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
 
-/* --- Responsive --- */
-@media (max-width: 640px) {
-  .container { padding: 16px 12px; }
-  .welcome-card { padding: 28px 20px; }
-  .welcome-card .domains-preview ol { columns: 1; }
-  .assessment-card { padding: 20px 16px; }
-  .results-section { padding: 20px 16px; }
-  .overall-score .score-value { font-size: 2.5rem; }
-  .score-table { font-size: 0.8rem; }
-  .score-table th, .score-table td { padding: 8px 6px; }
-  .export-bar { flex-direction: column; }
-  .btn-group { flex-direction: column; }
-  .tabs { overflow-x: auto; }
-  .plan-table { font-size: 0.78rem; }
-  .plan-table th, .plan-table td { padding: 6px 8px; }
-}
+      /* --- Responsive --- */
+      @media (max-width: 640px) {
+        .container {
+          padding: 16px 12px;
+        }
+        .welcome-card {
+          padding: 28px 20px;
+        }
+        .welcome-card .domains-preview ol {
+          columns: 1;
+        }
+        .assessment-card {
+          padding: 20px 16px;
+        }
+        .results-section {
+          padding: 20px 16px;
+        }
+        .overall-score .score-value {
+          font-size: 2.5rem;
+        }
+        .score-table {
+          font-size: 0.8rem;
+        }
+        .score-table th,
+        .score-table td {
+          padding: 8px 6px;
+        }
+        .export-bar {
+          flex-direction: column;
+        }
+        .btn-group {
+          flex-direction: column;
+        }
+        .tabs {
+          overflow-x: auto;
+        }
+        .plan-table {
+          font-size: 0.78rem;
+        }
+        .plan-table th,
+        .plan-table td {
+          padding: 6px 8px;
+        }
+      }
 
-/* --- Print styles --- */
-@media print {
-  body { background: #fff; }
-  .header, .nav-buttons, .export-bar, .btn, .tabs, .progress-container { display: none !important; }
-  .screen { display: none !important; }
-  #results-screen { display: block !important; }
-  .results-section { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
-  .tab-panel { display: block !important; }
-  .callout { break-inside: avoid; }
-  .plan-phase { break-inside: avoid; }
-  .chart-container { break-inside: avoid; }
-  .print-title { display: block !important; text-align: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-  .print-subtitle { display: block !important; text-align: center; font-size: 0.9rem; color: #6c757d; margin-bottom: 24px; }
-}
-.print-title, .print-subtitle { display: none; }
-</style>
-</head>
-<body>
+      /* --- Print styles --- */
+      @media print {
+        body {
+          background: #fff;
+        }
+        .header,
+        .nav-buttons,
+        .export-bar,
+        .btn,
+        .tabs,
+        .progress-container {
+          display: none !important;
+        }
+        .screen {
+          display: none !important;
+        }
+        #results-screen {
+          display: block !important;
+        }
+        .results-section {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          break-inside: avoid;
+        }
+        .tab-panel {
+          display: block !important;
+        }
+        .callout {
+          break-inside: avoid;
+        }
+        .plan-phase {
+          break-inside: avoid;
+        }
+        .chart-container {
+          break-inside: avoid;
+        }
+        .print-title {
+          display: block !important;
+          text-align: center;
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .print-subtitle {
+          display: block !important;
+          text-align: center;
+          font-size: 0.9rem;
+          color: #6c757d;
+          margin-bottom: 24px;
+        }
+      }
+      .print-title,
+      .print-subtitle {
+        display: none;
+      }
+      .site-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--color-border);
+        padding: 8px 20px;
+        font-size: 0.82rem;
+      }
+      .site-nav a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .site-nav a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site-nav"><a href="../">&larr; AI-CMM Home</a></nav>
 
-<div class="container">
-  <div class="header">
-    <h1>AI Agent Capability Maturity Model</h1>
-  </div>
-
-  <!-- WELCOME SCREEN -->
-  <div id="welcome-screen" class="screen active">
-    <div class="welcome-card">
-      <h2>Maturity Assessment</h2>
-      <p>Evaluate your organization's AI agent adoption maturity across 9 capability domains. You will score each domain from Level 0 (Unaware) to Level 5 (Adaptive).</p>
-      <p style="font-size:0.85rem; color:var(--color-text-muted);">Estimated time: 15 minutes. Best completed with a cross-functional team (engineering, security, platform, compliance).</p>
-
-      <div class="domains-preview">
-        <h3>Capability Domains</h3>
-        <ol>
-          <li>Dev Workflow</li>
-          <li>PR and Code Review</li>
-          <li>CI/CD</li>
-          <li>Infrastructure as Code</li>
-          <li>Ops and Incident Response</li>
-          <li>Security and Compliance</li>
-          <li>Knowledge Management</li>
-          <li>Governance</li>
-          <li>Evaluation and Measurement</li>
-        </ol>
+    <div class="container">
+      <div class="header">
+        <h1>AI Agent Capability Maturity Model</h1>
       </div>
 
-      <p style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:24px;">Scoring rule: A domain earns a level only if all required practices and artifacts for that level are in place. Partial completion means the domain stays at the previous level.</p>
+      <!-- WELCOME SCREEN -->
+      <div id="welcome-screen" class="screen active">
+        <div class="welcome-card">
+          <h2>Maturity Assessment</h2>
+          <p>
+            Evaluate your organization's AI agent adoption maturity across 9
+            capability domains. You will score each domain from Level 0
+            (Unaware) to Level 5 (Adaptive).
+          </p>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted)">
+            Estimated time: 15 minutes. Best completed with a cross-functional
+            team (engineering, security, platform, compliance).
+          </p>
 
-      <button class="btn btn-primary" onclick="startAssessment()">Start Assessment</button>
-    </div>
-  </div>
+          <div class="domains-preview">
+            <h3>Capability Domains</h3>
+            <ol>
+              <li>Dev Workflow</li>
+              <li>PR and Code Review</li>
+              <li>CI/CD</li>
+              <li>Infrastructure as Code</li>
+              <li>Ops and Incident Response</li>
+              <li>Security and Compliance</li>
+              <li>Knowledge Management</li>
+              <li>Governance</li>
+              <li>Evaluation and Measurement</li>
+            </ol>
+          </div>
 
-  <!-- ASSESSMENT SCREEN -->
-  <div id="assessment-screen" class="screen">
-    <div class="progress-container">
-      <div class="progress-info">
-        <span id="progress-label">Domain 1 of 9</span>
-        <span id="progress-percent">11%</span>
+          <p
+            style="
+              font-size: 0.85rem;
+              color: var(--color-text-muted);
+              margin-bottom: 24px;
+            "
+          >
+            Scoring rule: A domain earns a level only if all required practices
+            and artifacts for that level are in place. Partial completion means
+            the domain stays at the previous level.
+          </p>
+
+          <button class="btn btn-primary" onclick="startAssessment()">
+            Start Assessment
+          </button>
+        </div>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-fill" style="width:11%"></div>
+
+      <!-- ASSESSMENT SCREEN -->
+      <div id="assessment-screen" class="screen">
+        <div class="progress-container">
+          <div class="progress-info">
+            <span id="progress-label">Domain 1 of 9</span>
+            <span id="progress-percent">11%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div
+              class="progress-bar-fill"
+              id="progress-fill"
+              style="width: 11%"
+            ></div>
+          </div>
+        </div>
+        <div id="assessment-content"></div>
+        <div class="nav-buttons">
+          <button
+            class="btn btn-secondary"
+            id="btn-back"
+            onclick="prevDomain()"
+          >
+            Back
+          </button>
+          <button class="btn btn-primary" id="btn-next" onclick="nextDomain()">
+            Next
+          </button>
+        </div>
       </div>
-    </div>
-    <div id="assessment-content"></div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" id="btn-back" onclick="prevDomain()">Back</button>
-      <button class="btn btn-primary" id="btn-next" onclick="nextDomain()">Next</button>
-    </div>
-  </div>
 
-  <!-- RESULTS SCREEN -->
-  <div id="results-screen" class="screen">
-    <h2 class="print-title">AI Agent CMM Assessment Results</h2>
-    <p class="print-subtitle" id="print-date"></p>
+      <!-- RESULTS SCREEN -->
+      <div id="results-screen" class="screen">
+        <h2 class="print-title">AI Agent CMM Assessment Results</h2>
+        <p class="print-subtitle" id="print-date"></p>
 
-    <!-- Overall score -->
-    <div class="results-section overall-score" id="overall-section"></div>
+        <!-- Overall score -->
+        <div class="results-section overall-score" id="overall-section"></div>
 
-    <!-- Warnings -->
-    <div id="warnings-container"></div>
+        <!-- Warnings -->
+        <div id="warnings-container"></div>
 
-    <!-- Tabs for chart / table / plan -->
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="tab-chart">Radar Chart</button>
-      <button class="tab-btn" data-tab="tab-scores">Score Details</button>
-      <button class="tab-btn" data-tab="tab-plan">90-Day Plan</button>
-    </div>
+        <!-- Tabs for chart / table / plan -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tab-chart">
+            Radar Chart
+          </button>
+          <button class="tab-btn" data-tab="tab-scores">Score Details</button>
+          <button class="tab-btn" data-tab="tab-plan">90-Day Plan</button>
+        </div>
 
-    <div id="tab-chart" class="tab-panel active">
-      <div class="results-section">
-        <h2>Capability Radar</h2>
-        <div class="chart-container">
-          <canvas id="radar-canvas" width="560" height="560"></canvas>
+        <div id="tab-chart" class="tab-panel active">
+          <div class="results-section">
+            <h2>Capability Radar</h2>
+            <div class="chart-container">
+              <canvas id="radar-canvas" width="560" height="560"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-scores" class="tab-panel">
+          <div class="results-section">
+            <h2>Score Breakdown</h2>
+            <table class="score-table" id="score-table"></table>
+          </div>
+        </div>
+
+        <div id="tab-plan" class="tab-panel">
+          <div class="results-section">
+            <h2>Generated 90-Day Improvement Plan</h2>
+            <p
+              style="
+                font-size: 0.9rem;
+                color: var(--color-text-muted);
+                margin-bottom: 16px;
+              "
+            >
+              This plan targets your 3 highest-priority domains, aiming to
+              advance each by one level. Security and Governance gaps are
+              prioritized automatically.
+            </p>
+            <div id="plan-content"></div>
+          </div>
+        </div>
+
+        <!-- Export -->
+        <div class="export-bar">
+          <button class="btn btn-secondary btn-sm" onclick="exportMarkdown()">
+            Download as Markdown
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">
+            Download as PDF (Print)
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="copyToClipboard()">
+            Copy to Clipboard
+          </button>
+          <button
+            class="btn btn-secondary btn-sm"
+            onclick="restartAssessment()"
+          >
+            Retake Assessment
+          </button>
         </div>
       </div>
     </div>
 
-    <div id="tab-scores" class="tab-panel">
-      <div class="results-section">
-        <h2>Score Breakdown</h2>
-        <table class="score-table" id="score-table"></table>
-      </div>
-    </div>
+    <div class="toast" id="toast"></div>
 
-    <div id="tab-plan" class="tab-panel">
-      <div class="results-section">
-        <h2>Generated 90-Day Improvement Plan</h2>
-        <p style="font-size:0.9rem;color:var(--color-text-muted);margin-bottom:16px;">This plan targets your 3 highest-priority domains, aiming to advance each by one level. Security and Governance gaps are prioritized automatically.</p>
-        <div id="plan-content"></div>
-      </div>
-    </div>
+    <script>
+      // ============================================================
+      // DATA
+      // ============================================================
 
-    <!-- Export -->
-    <div class="export-bar">
-      <button class="btn btn-secondary btn-sm" onclick="exportMarkdown()">Download as Markdown</button>
-      <button class="btn btn-secondary btn-sm" onclick="window.print()">Download as PDF (Print)</button>
-      <button class="btn btn-secondary btn-sm" onclick="copyToClipboard()">Copy to Clipboard</button>
-      <button class="btn btn-secondary btn-sm" onclick="restartAssessment()">Retake Assessment</button>
-    </div>
-  </div>
-</div>
+      var LEVEL_NAMES = [
+        "Unaware",
+        "Exploratory",
+        "Defined",
+        "Managed",
+        "Optimized",
+        "Adaptive",
+      ];
 
-<div class="toast" id="toast"></div>
+      var DOMAINS = [
+        {
+          id: 1,
+          name: "Dev Workflow",
+          description:
+            "How agents are used during local development (IDE, dev environments, CLI).",
+          color: "var(--color-domain-1)",
+          criteria: [
+            "No intentional agent usage. No approved tools list exists.",
+            "Some developers use agents individually. No org-level configuration or policy.",
+            "Approved tools list published. Dev environments include agent tooling. Agent instruction files (e.g., CLAUDE.md) exist in repos. Org-managed API endpoints are configured.",
+            "Agent usage telemetry is collected and reviewed. Dev environment images are published through your artifact registry. Standardized agent instruction templates exist.",
+            "Agent-generated code is labeled in commits/PRs. IDE agent configs are version-controlled. Cross-repo context (RAG or doc index) is available.",
+            "Agent configs are tuned per-team based on outcomes. New capabilities go through structured pilots. Developer feedback loops are active and acted on.",
+          ],
+          evidence: [
+            "Approved tools list document (URL or location)",
+            "Dev environment definition showing agent tooling",
+            "Example agent instruction file from an active repo",
+            "API key management documentation or system access",
+            "Telemetry dashboard or report (if Level 3+)",
+          ],
+        },
+        {
+          id: 2,
+          name: "PR and Code Review",
+          description:
+            "How agent-generated code is reviewed, labeled, and merged.",
+          color: "var(--color-domain-2)",
+          criteria: [
+            "No review process differentiates agent-generated code.",
+            "Informal disclosure of agent usage in PRs.",
+            "PR template includes agent disclosure. Branch/merge protection requires human approval. Agent-specific checklist exists.",
+            "Agent PRs are auto-labeled. Review metrics are segmented by origin. Reviewer guidance document exists.",
+            "Automated pre-review checks run on agent PRs. High-risk changes require additional approval. Structured agent context is included in PRs.",
+            "Review rigor is risk-adjusted. Expedited review path exists for low-risk agent PRs. Defect data feeds back into agent guardrails.",
+          ],
+          evidence: [
+            "PR template showing agent disclosure field",
+            "Branch/merge protection rule configuration",
+            "Example agent-generated PR with review comments",
+            "Auto-labeling automation configuration (if Level 3+)",
+            "PR metrics segmented by origin (if Level 3+)",
+          ],
+        },
+        {
+          id: 3,
+          name: "CI/CD",
+          description:
+            "How agents participate in build, test, deploy pipelines.",
+          color: "var(--color-domain-3)",
+          criteria: [
+            "No agent interaction with CI/CD.",
+            "Developers occasionally use agents to write or debug pipelines.",
+            "Code ownership rules protect pipeline config files. Reusable pipeline component library exists. Pipeline authoring guide exists.",
+            "Agents run as isolated CI steps. Outputs are logged and auditable. Agent CI containers are from your artifact registry.",
+            "Agent CI cost and value are measured. Agent-aware gates exist for high-risk PRs. Agents propose pipeline improvements via PRs.",
+            "Agents autonomously maintain CI health (with approval). Pipeline configs generated from intent. Quality parity measured.",
+          ],
+          evidence: [
+            "Code ownership file showing pipeline config protection",
+            "Reusable pipeline component library location",
+            "Agent CI step definition (container image, permissions)",
+            "CI audit log sample",
+            "Cost/time impact data (if Level 4+)",
+          ],
+        },
+        {
+          id: 4,
+          name: "Infrastructure as Code",
+          description:
+            "How agents generate, modify, and validate IaC (Terraform, OpenTofu, Pulumi, CloudFormation, etc.).",
+          color: "var(--color-domain-4)",
+          criteria: [
+            "No IaC or no agent usage for IaC.",
+            "Developers use agents to generate IaC snippets ad hoc.",
+            "Agent instructions include IaC conventions. Linters enforced pre-merge. Wildcard IAM/RBAC prohibited. Regulated/standard modules separated.",
+            "Agents use internal module registry. Plan output posted to PRs. Drift detection runs. Cost estimation runs.",
+            "Policy-as-code (OPA/Sentinel/equivalent) enforced in CI. Production IaC changes require separate approval. Regulatory controls enforced by policy-as-code.",
+            "Agents maintain IaC (upgrades, refactors) with approval. Quality metrics tracked. Agents have read-only infra state access.",
+          ],
+          evidence: [
+            "IaC style guide document",
+            "Linter configuration files in repos",
+            "Agent instruction file with IaC-specific rules",
+            "Regulated vs. standard module separation evidence",
+            "Plan comment automation configuration",
+            "Policy-as-code library (if Level 4+)",
+          ],
+        },
+        {
+          id: 5,
+          name: "Ops and Incident Response",
+          description:
+            "How agents assist during incidents, runbooks, and operational tasks.",
+          color: "var(--color-domain-5)",
+          criteria: [
+            "No agent usage in ops.",
+            "Engineers occasionally use agents during incidents for ad hoc tasks.",
+            "Runbook safety rules exist. Agent ops access is read-only. Incident summaries are reviewed before distribution.",
+            "Agents assist with structured tasks (timelines, log correlation, postmortems). Agent actions are logged. Runbooks include agent steps with handoffs.",
+            "Agents execute pre-approved remediation actions with audit. Incident metrics track agent contribution.",
+            "Agents proactively identify anomalies. Remediation accuracy measured. Postmortems feed back into agent context automatically.",
+          ],
+          evidence: [
+            "Runbook safety rules document",
+            "Access role definition for agent ops access",
+            "Incident log showing agent actions (if Level 3+)",
+            "Approved remediation action list (if Level 4+)",
+            "Incident metrics with agent contribution data (if Level 4+)",
+          ],
+        },
+        {
+          id: 6,
+          name: "Security and Compliance",
+          description:
+            "How agent usage meets security policies, data classification, and regulatory requirements.",
+          color: "var(--color-domain-6)",
+          criteria: [
+            "No policy on agent usage. No awareness of data classification implications.",
+            "Security team is aware. Informal guidance exists.",
+            "Acceptable use policy published. Data classification rules defined. Regulated environment network boundaries enforced. Secrets scanning runs. API keys centrally managed.",
+            "API calls routed through org proxy with logging. Audit logs captured. Quarterly reviews performed. Dependency scanning integrated.",
+            "DLP prevents sensitive data leakage. Automated compliance scanning runs. Agent access governed by least-privilege roles. Exception process exists.",
+            "Controls continuously tuned. Behavioral anomaly detection active. Org contributes to industry standards.",
+          ],
+          evidence: [
+            "Acceptable use policy document",
+            "Data classification matrix for agent usage",
+            "Network boundary documentation for regulated environments",
+            "Secrets scanning configuration evidence",
+            "API gateway/proxy logging configuration (if Level 3+)",
+            "DLP configuration (if Level 4+)",
+          ],
+        },
+        {
+          id: 7,
+          name: "Knowledge Management",
+          description:
+            "How agents consume and contribute to org documentation, ADRs, and context.",
+          color: "var(--color-domain-7)",
+          criteria: [
+            "Sparse or no documentation. Agents have no useful context.",
+            "Developers occasionally point agents at README files.",
+            "Agent instruction files exist per repo. ADRs maintained. Agents know where docs live.",
+            "Doc quality measured. Agents assist with doc maintenance. Searchable doc index exists.",
+            "RAG or knowledge retrieval system available. Curated knowledge base with editorial process. Agent docs merged into canonical base.",
+            "Knowledge base refined by usage patterns. Agents flag knowledge gaps. Cross-team knowledge accessible.",
+          ],
+          evidence: [
+            "Example agent instruction file from active repo",
+            "ADR directory in at least one repo",
+            "Documentation quality metrics (if Level 3+)",
+            "RAG or knowledge retrieval system documentation (if Level 4+)",
+          ],
+        },
+        {
+          id: 8,
+          name: "Governance",
+          description:
+            "How the org manages agent access, approvals, audit, and exceptions.",
+          color: "var(--color-domain-8)",
+          criteria: [
+            "No one owns AI agent strategy.",
+            "Someone informally tracks agent usage.",
+            "Governance body exists. Approved tools list, policy, and exception process maintained. Regulated environment governance addendum exists.",
+            "Regular reporting to leadership. Cost tracked and allocated. Risk register includes agent risks. Vendor assessments done.",
+            "Policy-as-code enforces governance. Cross-functional governance in place. Governance aligns with broader frameworks.",
+            "Governance processes improved by measured outcomes. Regulatory horizon scanning active. Governance is transparent org-wide.",
+          ],
+          evidence: [
+            "Governance body charter or terms of reference",
+            "Decision log for agent-related decisions",
+            "Regulated environment governance addendum",
+            "Leadership report example (if Level 3+)",
+            "Cost allocation data (if Level 3+)",
+          ],
+        },
+        {
+          id: 9,
+          name: "Evaluation and Measurement",
+          description: "How the org measures agent value, quality, and risk.",
+          color: "var(--color-domain-9)",
+          criteria: [
+            "No data on agent usage or impact.",
+            "Anecdotal feedback only.",
+            "5+ KPIs defined. Baselines taken. Developer surveys conducted.",
+            "KPIs measured monthly. Cohort comparisons done. Agent code quality measured.",
+            "All 12+ KPIs active. ROI analysis includes costs and benefits. Measurement drives tool decisions.",
+            "Measurement framework itself is evaluated. Leading indicators tracked. Methodology shared externally.",
+          ],
+          evidence: [
+            "KPI definitions document",
+            "Baseline measurement report",
+            "Developer survey instrument and results",
+            "Monthly KPI report (if Level 3+)",
+            "ROI analysis (if Level 4+)",
+          ],
+        },
+      ];
 
-<script>
-// ============================================================
-// DATA
-// ============================================================
+      // Roadmap actions: keyed by domain index, then by target level (current+1)
+      // Each entry has phases with actions
+      var ROADMAP = {
+        0: {
+          // Dev Workflow
+          1: {
+            governance: [
+              "Identify which AI agent tools developers are currently using informally",
+            ],
+            tooling: ["Research and shortlist agent tools for evaluation"],
+            standards: ["Draft informal guidance on agent tool usage"],
+            pilot: [
+              "Allow interested developers to use agents on non-critical work",
+            ],
+            observe: ["Gather informal feedback on agent usefulness"],
+            evaluate: ["Decide whether to proceed with formal adoption"],
+          },
+          2: {
+            governance: ["Publish an approved agent tools list"],
+            tooling: [
+              "Configure org-managed API endpoints for approved tools",
+              "Add agent tooling to dev environment definitions",
+            ],
+            standards: [
+              "Create agent instruction files (e.g., CLAUDE.md) for pilot repos",
+              "Document API key management procedures",
+            ],
+            pilot: ["Deploy configured dev environments to pilot teams"],
+            observe: ["Track which teams adopt the approved tooling"],
+            evaluate: ["Review adoption barriers and adjust tooling"],
+          },
+          3: {
+            governance: [
+              "Define telemetry collection requirements and privacy approach",
+            ],
+            tooling: [
+              "Build and publish dev environment images through artifact registry",
+              "Set up agent usage telemetry pipeline",
+            ],
+            standards: [
+              "Create standardized agent instruction templates per project type",
+            ],
+            pilot: [
+              "Deploy telemetry to pilot repos",
+              "Curate agent context (docs, not raw repo dumps)",
+            ],
+            observe: [
+              "Review telemetry data monthly",
+              "Monitor template adoption across repos",
+            ],
+            evaluate: [
+              "Assess whether telemetry reveals quality or usage patterns worth acting on",
+            ],
+          },
+          4: {
+            governance: [
+              "Define commit labeling convention for agent-generated code",
+            ],
+            tooling: [
+              "Implement auto-labeling of agent-generated commits/PRs",
+              "Deploy cross-repo context system (RAG or doc index)",
+            ],
+            standards: [
+              "Version-control IDE agent configurations",
+              "Document cross-repo context access patterns",
+            ],
+            pilot: ["Roll out labeling and RAG to early-adopter teams"],
+            observe: [
+              "Measure adoption of labeling and cross-repo context usage",
+            ],
+            evaluate: [
+              "Evaluate quality of cross-repo context and labeling accuracy",
+            ],
+          },
+          5: {
+            governance: [
+              "Establish structured pilot process for new agent capabilities",
+            ],
+            tooling: [
+              "Build feedback mechanism for developer ratings of agent suggestions",
+            ],
+            standards: [
+              "Create per-team agent configuration tuning guidelines",
+            ],
+            pilot: [
+              "Run structured pilot for a new agent capability",
+              "Begin per-team config tuning based on outcomes",
+            ],
+            observe: ["Monitor feedback loop data and tuning outcomes"],
+            evaluate: [
+              "Assess whether tuning improves measured quality and velocity",
+            ],
+          },
+        },
+        1: {
+          // PR and Code Review
+          1: {
+            governance: [
+              "Communicate expectation that agent usage should be disclosed in PRs",
+            ],
+            tooling: [],
+            standards: [
+              "Share informal guidance on disclosing agent usage in PR descriptions",
+            ],
+            pilot: ["Ask pilot teams to note agent usage in PRs"],
+            observe: ["Review whether disclosure is happening consistently"],
+            evaluate: ["Identify gaps in disclosure practices"],
+          },
+          2: {
+            governance: [
+              "Require human approval for all PRs via branch/merge protection",
+            ],
+            tooling: ["Add agent disclosure field to PR template"],
+            standards: ["Create agent-specific PR review checklist"],
+            pilot: [
+              "Deploy updated PR templates and checklists to pilot repos",
+            ],
+            observe: [
+              "Track checklist completion rates on agent-generated PRs",
+            ],
+            evaluate: ["Assess whether checklists improve review quality"],
+          },
+          3: {
+            governance: [
+              "Define reviewer guidance for agent-generated code patterns",
+            ],
+            tooling: [
+              "Implement auto-labeling of agent PRs via CI or bot",
+              "Set up PR metrics dashboard segmented by origin",
+            ],
+            standards: [
+              "Publish reviewer guidance document (hallucinated imports, over-abstraction, etc.)",
+            ],
+            pilot: [
+              "Deploy auto-labeling and segmented metrics to pilot repos",
+            ],
+            observe: [
+              "Compare merge time and defect rates: agent vs. human PRs",
+            ],
+            evaluate: ["Act on metric differences between agent and human PRs"],
+          },
+          4: {
+            governance: [
+              "Define high-risk change categories requiring additional approval",
+            ],
+            tooling: [
+              "Configure automated pre-review checks for agent PRs (lint, type-check, coverage, secrets)",
+              "Set up code ownership rules for high-risk paths",
+            ],
+            standards: [
+              "Create structured PR description template showing agent context (prompt, files read, changes)",
+            ],
+            pilot: ["Deploy pre-review gates and structured descriptions"],
+            observe: [
+              "Measure pre-review gate catch rate and false positive rate",
+            ],
+            evaluate: ["Tune gates based on false positive and defect data"],
+          },
+          5: {
+            governance: [
+              "Define expedited review policy with clear boundaries for low-risk agent PRs",
+            ],
+            tooling: [
+              "Implement risk scoring for PRs (file sensitivity, blast radius, defect history)",
+              "Build feedback pipeline from defect data to agent prompts/guardrails",
+            ],
+            standards: [
+              "Document risk scoring model and recalibration schedule",
+            ],
+            pilot: ["Pilot expedited review path for qualifying PRs"],
+            observe: [
+              "Track defect rates on expedited vs. standard review PRs",
+            ],
+            evaluate: [
+              "Recalibrate risk scoring and review expedited review boundaries",
+            ],
+          },
+        },
+        2: {
+          // CI/CD
+          1: {
+            governance: [
+              "Acknowledge that developers use agents to write/debug pipelines",
+            ],
+            tooling: [],
+            standards: [
+              "Share guidance on testing agent-generated pipeline configs before committing",
+            ],
+            pilot: [
+              "Allow agents to assist with pipeline writing in pilot repos",
+            ],
+            observe: ["Track quality of agent-generated pipeline changes"],
+            evaluate: ["Decide whether to formalize agent CI usage"],
+          },
+          2: {
+            governance: [
+              "Establish code ownership rules for pipeline config files",
+            ],
+            tooling: [
+              "Create reusable pipeline component library",
+              "Ensure pipeline config dirs are protected by code ownership",
+            ],
+            standards: [
+              "Write pipeline authoring guide for agents",
+              "Instruct agents to use shared pipeline components",
+            ],
+            pilot: [
+              "Deploy code ownership and reusable components to pilot repos",
+            ],
+            observe: ["Track whether agents follow pipeline standards"],
+            evaluate: [
+              "Assess reusable component adoption and pipeline quality",
+            ],
+          },
+          3: {
+            governance: [
+              "Define isolation and permission requirements for agent CI steps",
+            ],
+            tooling: [
+              "Build containerized agent CI steps with least-privilege access",
+              "Publish agent CI containers to artifact registry",
+              "Configure audit logging for agent CI outputs",
+            ],
+            standards: [
+              "Document agent CI step specifications and audit requirements",
+            ],
+            pilot: [
+              "Deploy agent CI steps to pilot repos (test generation, linting, doc updates)",
+            ],
+            observe: ["Review audit logs for agent CI steps monthly"],
+            evaluate: [
+              "Assess value delivered by agent CI steps vs. pipeline time added",
+            ],
+          },
+          4: {
+            governance: ["Define agent-aware gates for high-risk PRs in CI"],
+            tooling: [
+              "Set up cost and value dashboard for agent CI steps",
+              "Configure agent-aware gates that add checks for high-risk agent PRs",
+            ],
+            standards: [
+              "Allow agents to propose pipeline improvements as PRs (caching, parallelism)",
+            ],
+            pilot: ["Deploy cost tracking and agent-aware gates"],
+            observe: [
+              "Measure cost per run, time impact, and value (bugs caught, tests generated)",
+            ],
+            evaluate: [
+              "Decide which agent CI capabilities to expand or retire",
+            ],
+          },
+          5: {
+            governance: [
+              "Define autonomous maintenance policy with approval requirements",
+            ],
+            tooling: [
+              "Enable agents to maintain CI health (dependency updates, flaky test fixes) with PR approval",
+              "Explore intent-based pipeline definitions",
+            ],
+            standards: [
+              "Measure quality parity between agent and human CI contributions",
+            ],
+            pilot: ["Pilot autonomous CI maintenance on select repos"],
+            observe: [
+              "Track quality and reliability of autonomous maintenance changes",
+            ],
+            evaluate: [
+              "Assess whether autonomous maintenance reduces toil without adding risk",
+            ],
+          },
+        },
+        3: {
+          // IaC
+          1: {
+            governance: [
+              "Acknowledge that developers use agents for IaC snippet generation",
+            ],
+            tooling: [],
+            standards: [
+              "Share guidance on reviewing agent-generated IaC (always run plan)",
+            ],
+            pilot: ["Allow agents to generate IaC snippets in pilot projects"],
+            observe: ["Review quality of agent-generated IaC"],
+            evaluate: ["Identify common issues in agent-generated IaC"],
+          },
+          2: {
+            governance: ["Prohibit wildcard IAM/RBAC in agent-generated IaC"],
+            tooling: [
+              "Configure linters (tflint, checkov, tfsec) to run pre-merge",
+              "Separate regulated and standard modules into distinct paths",
+            ],
+            standards: [
+              "Add IaC conventions to agent instruction files",
+              "Document regulated vs. standard module separation",
+            ],
+            pilot: ["Deploy linting and agent IaC instructions to pilot repos"],
+            observe: ["Track linter failure rates on agent-generated IaC"],
+            evaluate: ["Assess whether agent instructions reduce IaC issues"],
+          },
+          3: {
+            governance: ["Require plan review for all agent-generated IaC PRs"],
+            tooling: [
+              "Set up internal module registry for agents to consume",
+              "Automate plan output posting to PRs",
+              "Enable drift detection pipeline",
+              "Integrate cost estimation (e.g., Infracost)",
+            ],
+            standards: [
+              "Instruct agents to use approved module registry instead of raw resources",
+            ],
+            pilot: [
+              "Deploy module registry, plan commenting, and cost estimation to pilot repos",
+            ],
+            observe: [
+              "Track drift detection findings and cost estimation accuracy",
+            ],
+            evaluate: [
+              "Assess module registry adoption and plan review effectiveness",
+            ],
+          },
+          4: {
+            governance: [
+              "Require separate approval for production IaC changes from infrastructure team",
+            ],
+            tooling: [
+              "Implement policy-as-code (OPA/Sentinel) enforcement in CI",
+              "Automate regulatory control validation",
+            ],
+            standards: [
+              "Document which regulatory controls are enforced by policy-as-code vs. manual review",
+            ],
+            pilot: ["Deploy policy-as-code enforcement to repos with IaC"],
+            observe: ["Track policy violation rates and false positive rates"],
+            evaluate: [
+              "Tune policy-as-code rules based on violation and false positive data",
+            ],
+          },
+          5: {
+            governance: [
+              "Define approval gates for autonomous IaC maintenance (upgrades, refactors)",
+            ],
+            tooling: [
+              "Enable agents to maintain IaC (provider upgrades, deprecated resource refactoring)",
+              "Provide agents read-only infrastructure state access",
+            ],
+            standards: [
+              "Track IaC generation quality metrics (plan accuracy, policy violations, rework rate)",
+            ],
+            pilot: [
+              "Pilot autonomous IaC maintenance on non-production modules",
+            ],
+            observe: ["Measure quality metrics for autonomous IaC changes"],
+            evaluate: [
+              "Decide whether to expand autonomous IaC maintenance scope",
+            ],
+          },
+        },
+        4: {
+          // Ops and Incident Response
+          1: {
+            governance: [
+              "Acknowledge that engineers use agents during incidents informally",
+            ],
+            tooling: [],
+            standards: [
+              "Share guidance on verifying agent suggestions during incidents",
+            ],
+            pilot: [
+              "Allow agents for log searching and incident summary drafting",
+            ],
+            observe: ["Gather feedback on agent usefulness during incidents"],
+            evaluate: ["Identify risks and benefits of agent use in ops"],
+          },
+          2: {
+            governance: [
+              "Publish runbook safety rules for agent usage during incidents",
+            ],
+            tooling: [
+              "Configure read-only access roles for agents in ops contexts",
+              "Set up incident summary review workflow",
+            ],
+            standards: [
+              "Create incident summary review checklist",
+              "Document that agents must not have write access to production",
+            ],
+            pilot: [
+              "Deploy runbook safety rules and read-only access to pilot teams",
+            ],
+            observe: ["Track adherence to safety rules during incidents"],
+            evaluate: [
+              "Assess whether safety rules are practical and followed",
+            ],
+          },
+          3: {
+            governance: [
+              "Define requirements for logging all agent actions during incidents",
+            ],
+            tooling: [
+              "Enable agents for structured incident tasks (timelines, log correlation, draft postmortems)",
+              "Configure agent action audit logging during incidents",
+            ],
+            standards: [
+              "Add agent-assisted steps to runbooks with clear handoff points",
+              "Create postmortem template with agent-contribution section",
+            ],
+            pilot: ["Deploy agent-assisted runbooks to pilot SRE teams"],
+            observe: [
+              "Review agent action logs for quality and appropriateness",
+              "Track whether agent assistance improves or hinders incident response",
+            ],
+            evaluate: ["Refine runbook agent steps based on incident outcomes"],
+          },
+          4: {
+            governance: [
+              "Define and approve list of permitted agent remediation actions",
+            ],
+            tooling: [
+              "Build controlled interface for pre-approved agent remediation actions",
+              "Set up approval and audit trail for agent-executed remediations",
+            ],
+            standards: [
+              "Document incident metrics that track agent contribution (time-to-detection, time-to-mitigation)",
+            ],
+            pilot: [
+              "Pilot agent remediation actions (restart service, scale up, toggle feature flag) with approval",
+            ],
+            observe: [
+              "Measure agent remediation accuracy and time savings",
+              "Review audit trails for compliance",
+            ],
+            evaluate: [
+              "Expand or contract approved action list based on accuracy data",
+            ],
+          },
+          5: {
+            governance: [
+              "Define policies for proactive agent anomaly detection and alerting",
+            ],
+            tooling: [
+              "Integrate agents with anomaly detection systems for proactive identification",
+              "Automate postmortem-to-runbook feedback pipeline",
+            ],
+            standards: [
+              "Measure remediation accuracy and use it to adjust approved actions",
+            ],
+            pilot: ["Pilot proactive anomaly detection with agent alerting"],
+            observe: [
+              "Track false positive rate and actionability of proactive alerts",
+            ],
+            evaluate: [
+              "Assess whether proactive capabilities reduce incident frequency",
+            ],
+          },
+        },
+        5: {
+          // Security and Compliance
+          1: {
+            governance: [
+              "Ensure security team is aware of AI agent usage across the org",
+            ],
+            tooling: [],
+            standards: [
+              "Share informal guidance about not pasting secrets or PII into agent prompts",
+            ],
+            pilot: [
+              "Communicate basic data handling expectations to developers using agents",
+            ],
+            observe: [
+              "Monitor for reports of sensitive data exposure through agents",
+            ],
+            evaluate: ["Determine urgency of formal policy creation"],
+          },
+          2: {
+            governance: [
+              "Publish acceptable use policy for AI agents",
+              "Define data classification rules for agent interactions",
+            ],
+            tooling: [
+              "Configure secrets scanning on all repos with agent usage",
+              "Set up centralized API key management",
+              "Enforce regulated environment network boundaries for AI endpoints",
+            ],
+            standards: [
+              "Create data classification matrix for agent usage",
+              "Document regulated environment restrictions",
+            ],
+            pilot: [
+              "Deploy secrets scanning and centralized key management to pilot repos",
+            ],
+            observe: [
+              "Track secrets scanning findings",
+              "Audit API key usage patterns",
+            ],
+            evaluate: ["Assess policy coverage and identify gaps"],
+          },
+          3: {
+            governance: [
+              "Establish quarterly review process for agent usage logs",
+            ],
+            tooling: [
+              "Route all agent API calls through org proxy/gateway with logging",
+              "Set up audit log pipeline to SIEM",
+              "Integrate dependency scanning for agent-suggested packages",
+            ],
+            standards: [
+              "Document audit log retention and review procedures",
+              "Define supply chain security requirements for agent-suggested dependencies",
+            ],
+            pilot: ["Deploy API gateway logging and dependency scanning"],
+            observe: [
+              "Conduct first quarterly audit review",
+              "Track policy violation findings",
+            ],
+            evaluate: [
+              "Remediate findings and adjust proxy/scanning configuration",
+            ],
+          },
+          4: {
+            governance: [
+              "Create exception process for cases requiring agent access to restricted data/systems",
+            ],
+            tooling: [
+              "Deploy DLP controls to prevent sensitive data reaching agent endpoints",
+              "Implement automated compliance scanning for agent-generated code",
+              "Configure least-privilege access roles for agents per repo/team",
+            ],
+            standards: [
+              "Document exception request process and approval workflow",
+              "Define access role specifications for agent usage",
+            ],
+            pilot: [
+              "Deploy DLP and compliance scanning",
+              "Process first exception requests through formal workflow",
+            ],
+            observe: [
+              "Measure DLP false positive rate",
+              "Track compliance scanning findings",
+            ],
+            evaluate: [
+              "Tune DLP and scanning rules to reduce false positives while maintaining coverage",
+            ],
+          },
+          5: {
+            governance: [
+              "Establish continuous security control tuning process based on threat intelligence",
+            ],
+            tooling: [
+              "Deploy behavioral anomaly detection for agent usage patterns",
+              "Automate security control adjustment based on audit findings",
+            ],
+            standards: [
+              "Contribute to industry standards for AI agent security",
+              "Document control tuning rationale and changes",
+            ],
+            pilot: [
+              "Pilot anomaly detection and share learnings with industry peers",
+            ],
+            observe: [
+              "Monitor anomaly detection alert quality and response times",
+            ],
+            evaluate: [
+              "Assess whether continuous tuning reduces real risk vs. adding noise",
+            ],
+          },
+        },
+        6: {
+          // Knowledge Management
+          1: {
+            governance: [
+              "Encourage developers to give agents useful context (README, docs)",
+            ],
+            tooling: [],
+            standards: [
+              "Identify key documentation that agents should reference",
+            ],
+            pilot: [
+              "Have pilot developers point agents at README and key docs",
+            ],
+            observe: [
+              "Gather feedback on whether available docs help agent output quality",
+            ],
+            evaluate: [
+              "Identify documentation gaps that hurt agent effectiveness",
+            ],
+          },
+          2: {
+            governance: [
+              "Require agent instruction files in every active repo",
+            ],
+            tooling: ["Configure agents to know where documentation lives"],
+            standards: [
+              "Create agent instruction files per repo with project description, conventions, architecture",
+              "Establish ADR practice in at least key repos",
+            ],
+            pilot: ["Deploy agent instruction files and ADRs to pilot repos"],
+            observe: [
+              "Track whether instruction files improve agent output relevance",
+            ],
+            evaluate: [
+              "Refine instruction file templates based on pilot feedback",
+            ],
+          },
+          3: {
+            governance: [
+              "Define documentation quality metrics (coverage, freshness, satisfaction)",
+            ],
+            tooling: [
+              "Build searchable documentation index for agents",
+              "Enable agents to assist with doc maintenance (update READMEs, flag stale docs)",
+            ],
+            standards: [
+              "Create agent-assisted doc maintenance workflow with human review",
+              "Define doc quality measurement approach",
+            ],
+            pilot: [
+              "Deploy doc index and agent doc maintenance to pilot repos",
+            ],
+            observe: [
+              "Measure documentation quality improvements",
+              "Review agent-generated doc updates for accuracy",
+            ],
+            evaluate: [
+              "Assess whether agent doc maintenance improves freshness without reducing accuracy",
+            ],
+          },
+          4: {
+            governance: [
+              "Establish editorial process for curated knowledge base",
+            ],
+            tooling: [
+              "Deploy RAG or knowledge retrieval system for agents",
+              "Build pipeline to merge reviewed agent docs into canonical knowledge base",
+            ],
+            standards: [
+              "Define knowledge base content standards and review workflow",
+              "Curate knowledge base with org standards, approved patterns, incident learnings",
+            ],
+            pilot: [
+              "Connect agents to RAG system",
+              "Process first batch of agent-generated docs through editorial review",
+            ],
+            observe: ["Measure RAG retrieval relevance and accuracy"],
+            evaluate: [
+              "Tune RAG configuration and editorial process based on quality data",
+            ],
+          },
+          5: {
+            governance: [
+              "Define cross-team knowledge access policies respecting data classification",
+            ],
+            tooling: [
+              "Build knowledge gap tracking system",
+              "Enable agents to flag questions they cannot answer from available context",
+              "Allow agents to synthesize documentation across teams",
+            ],
+            standards: [
+              "Create knowledge base refinement changelog",
+              "Document cross-team access boundaries",
+            ],
+            pilot: ["Pilot cross-team knowledge access and gap tracking"],
+            observe: [
+              "Monitor knowledge gap identification and resolution rates",
+            ],
+            evaluate: [
+              "Assess whether gap tracking drives meaningful documentation improvements",
+            ],
+          },
+        },
+        7: {
+          // Governance
+          1: {
+            governance: [
+              "Assign at least one person to informally track AI agent usage and interest",
+            ],
+            tooling: [],
+            standards: [
+              "Create basic tracking mechanism (spreadsheet, chat channel) for agent usage",
+            ],
+            pilot: [
+              "Begin informal coordination across teams evaluating agents",
+            ],
+            observe: [
+              "Monitor for shadow IT and uncoordinated evaluation efforts",
+            ],
+            evaluate: [
+              "Determine if formal governance is needed based on adoption velocity",
+            ],
+          },
+          2: {
+            governance: [
+              "Form AI agent governance body (working group)",
+              "Publish approved tools list and acceptable use policy",
+              "Create exception process for agent usage outside standard policy",
+            ],
+            tooling: [
+              "Set up decision log for agent-related governance decisions",
+            ],
+            standards: [
+              "Write governance body charter or terms of reference",
+              "Create regulated environment governance addendum",
+            ],
+            pilot: [
+              "Operate governance process with pilot teams",
+              "Process first exception requests",
+            ],
+            observe: [
+              "Track governance decision throughput and team satisfaction",
+            ],
+            evaluate: [
+              "Assess whether governance enables rather than blocks adoption",
+            ],
+          },
+          3: {
+            governance: [
+              "Establish regular reporting to leadership (monthly or quarterly)",
+              "Add AI agent risks to org risk register",
+            ],
+            tooling: [
+              "Set up cost tracking and allocation by team/project",
+              "Conduct vendor assessments for AI agent providers",
+            ],
+            standards: [
+              "Create leadership report template",
+              "Define cost allocation methodology",
+            ],
+            pilot: [
+              "Deliver first leadership report",
+              "Complete vendor assessment for primary agent provider",
+            ],
+            observe: [
+              "Track whether leadership engages with reports",
+              "Monitor cost allocation accuracy",
+            ],
+            evaluate: ["Refine reporting based on leadership feedback"],
+          },
+          4: {
+            governance: [
+              "Establish cross-functional governance with engineering, security, legal, compliance",
+              "Align agent governance with broader IT and data governance frameworks",
+            ],
+            tooling: [
+              "Implement policy-as-code to enforce agent boundaries",
+              "Automate approval workflows",
+            ],
+            standards: [
+              "Document governance framework alignment",
+              "Create cross-functional meeting cadence and decision process",
+            ],
+            pilot: [
+              "Deploy policy-as-code enforcement",
+              "Hold first cross-functional governance session",
+            ],
+            observe: [
+              "Track policy-as-code enforcement outcomes (blocks, exceptions)",
+              "Monitor governance overhead vs. value",
+            ],
+            evaluate: [
+              "Tune automated governance to reduce false blocks while maintaining oversight",
+            ],
+          },
+          5: {
+            governance: [
+              "Implement regulatory horizon scanning for upcoming AI regulations",
+              "Make all governance decisions transparent and communicated org-wide",
+            ],
+            tooling: [
+              "Build governance improvement tracking based on measured outcomes (adoption rate, incidents, compliance)",
+            ],
+            standards: [
+              "Document governance improvement process and changelog",
+              "Create org-wide governance communication plan",
+            ],
+            pilot: [
+              "Publish first governance transparency report",
+              "Conduct first regulatory horizon scan",
+            ],
+            observe: [
+              "Monitor whether governance improvements correlate with better outcomes",
+            ],
+            evaluate: [
+              "Assess governance maturity and plan next evolution cycle",
+            ],
+          },
+        },
+        8: {
+          // Evaluation and Measurement
+          1: {
+            governance: [
+              "Decide to begin collecting data on agent usage and impact",
+            ],
+            tooling: [],
+            standards: [
+              "Create simple feedback channel for developers to share agent experiences",
+            ],
+            pilot: ["Gather anecdotal feedback from agent users"],
+            observe: ["Review feedback themes and patterns"],
+            evaluate: ["Determine whether to invest in formal measurement"],
+          },
+          2: {
+            governance: ["Define 5+ KPIs for agent adoption and effectiveness"],
+            tooling: ["Set up baseline measurement collection infrastructure"],
+            standards: [
+              "Create KPI definitions document",
+              "Design developer survey instrument",
+            ],
+            pilot: [
+              "Collect baseline measurements before expanding agent usage",
+              "Conduct first developer survey",
+            ],
+            observe: ["Review baseline data quality and completeness"],
+            evaluate: [
+              "Validate that chosen KPIs are measurable and meaningful",
+            ],
+          },
+          3: {
+            governance: [
+              "Establish monthly KPI measurement and reporting cadence",
+            ],
+            tooling: [
+              "Set up cohort comparison infrastructure (agent vs. non-agent teams)",
+              "Build agent code quality measurement pipeline",
+            ],
+            standards: [
+              "Define cohort comparison methodology",
+              "Create monthly KPI report template",
+            ],
+            pilot: [
+              "Begin monthly KPI measurement",
+              "Run first cohort comparison",
+            ],
+            observe: [
+              "Track KPI trends monthly",
+              "Review cohort comparison for confounding factors",
+            ],
+            evaluate: [
+              "Act on KPI findings -- adjust tools, training, or processes based on data",
+            ],
+          },
+          4: {
+            governance: [
+              "Expand to all 12+ KPIs",
+              "Require measurement-driven justification for tool decisions",
+            ],
+            tooling: [
+              "Build full KPI dashboard",
+              "Set up ROI analysis pipeline (direct costs, indirect costs, benefits)",
+            ],
+            standards: [
+              "Create ROI analysis methodology",
+              "Document how measurements drive decisions",
+            ],
+            pilot: [
+              "Complete first ROI analysis",
+              "Make at least one measurement-driven tool decision",
+            ],
+            observe: [
+              "Track all KPIs and review quarterly",
+              "Document decisions driven by measurement data",
+            ],
+            evaluate: [
+              "Assess whether measurement overhead is justified by decision quality",
+            ],
+          },
+          5: {
+            governance: [
+              "Evaluate and improve the measurement framework itself",
+              "Define leading indicators (not just lagging)",
+            ],
+            tooling: [
+              "Build leading indicator tracking",
+              "Prepare anonymized results for external sharing",
+            ],
+            standards: [
+              "Document measurement framework review process",
+              "Create publishable case study or methodology report",
+            ],
+            pilot: [
+              "Track leading indicators alongside standard KPIs",
+              "Share methodology or results externally",
+            ],
+            observe: ["Assess predictive value of leading indicators"],
+            evaluate: ["Refine measurement framework and plan next evolution"],
+          },
+        },
+      };
 
-var LEVEL_NAMES = ['Unaware','Exploratory','Defined','Managed','Optimized','Adaptive'];
+      var INTERPRETATION = [
+        {
+          min: 0,
+          max: 0.9,
+          title: "No meaningful adoption",
+          text: "The organization either prohibits agents or is unaware of usage.",
+          action:
+            "Start with awareness and a small pilot. Establish basic policy.",
+        },
+        {
+          min: 1,
+          max: 1.9,
+          title: "Early exploration",
+          text: "Individual usage exists but is ungoverned. Risk is unmanaged.",
+          action:
+            "Prioritize governance (policy, approved tools) and security (data classification, key management).",
+        },
+        {
+          min: 2,
+          max: 2.9,
+          title: "Foundation in place",
+          text: "Policies and tooling exist but are not yet instrumented or measured.",
+          action:
+            "Focus on instrumentation (telemetry, metrics, audit logs) and standardization (templates, reusable components).",
+        },
+        {
+          min: 3,
+          max: 3.9,
+          title: "Instrumented and managed",
+          text: "The org has visibility into agent usage and quality. Workflows are standardized.",
+          action:
+            "Optimize: embed agents deeper in CI/CD and IaC, automate governance, invest in advanced capabilities (RAG, risk scoring).",
+        },
+        {
+          min: 4,
+          max: 4.9,
+          title: "Well-optimized",
+          text: "Agents are integrated across the SDLC with automated governance and measurement.",
+          action:
+            "Move toward adaptive: continuous tuning, proactive capabilities, industry leadership.",
+        },
+        {
+          min: 5,
+          max: 5,
+          title: "Adaptive",
+          text: "Continuous improvement across all domains.",
+          action: "Maintain and share learnings. Watch for complacency.",
+        },
+      ];
 
-var DOMAINS = [
-  {
-    id: 1,
-    name: 'Dev Workflow',
-    description: 'How agents are used during local development (IDE, dev environments, CLI).',
-    color: 'var(--color-domain-1)',
-    criteria: [
-      'No intentional agent usage. No approved tools list exists.',
-      'Some developers use agents individually. No org-level configuration or policy.',
-      'Approved tools list published. Dev environments include agent tooling. Agent instruction files (e.g., CLAUDE.md) exist in repos. Org-managed API endpoints are configured.',
-      'Agent usage telemetry is collected and reviewed. Dev environment images are published through your artifact registry. Standardized agent instruction templates exist.',
-      'Agent-generated code is labeled in commits/PRs. IDE agent configs are version-controlled. Cross-repo context (RAG or doc index) is available.',
-      'Agent configs are tuned per-team based on outcomes. New capabilities go through structured pilots. Developer feedback loops are active and acted on.'
-    ],
-    evidence: [
-      'Approved tools list document (URL or location)',
-      'Dev environment definition showing agent tooling',
-      'Example agent instruction file from an active repo',
-      'API key management documentation or system access',
-      'Telemetry dashboard or report (if Level 3+)'
-    ]
-  },
-  {
-    id: 2,
-    name: 'PR and Code Review',
-    description: 'How agent-generated code is reviewed, labeled, and merged.',
-    color: 'var(--color-domain-2)',
-    criteria: [
-      'No review process differentiates agent-generated code.',
-      'Informal disclosure of agent usage in PRs.',
-      'PR template includes agent disclosure. Branch/merge protection requires human approval. Agent-specific checklist exists.',
-      'Agent PRs are auto-labeled. Review metrics are segmented by origin. Reviewer guidance document exists.',
-      'Automated pre-review checks run on agent PRs. High-risk changes require additional approval. Structured agent context is included in PRs.',
-      'Review rigor is risk-adjusted. Expedited review path exists for low-risk agent PRs. Defect data feeds back into agent guardrails.'
-    ],
-    evidence: [
-      'PR template showing agent disclosure field',
-      'Branch/merge protection rule configuration',
-      'Example agent-generated PR with review comments',
-      'Auto-labeling automation configuration (if Level 3+)',
-      'PR metrics segmented by origin (if Level 3+)'
-    ]
-  },
-  {
-    id: 3,
-    name: 'CI/CD',
-    description: 'How agents participate in build, test, deploy pipelines.',
-    color: 'var(--color-domain-3)',
-    criteria: [
-      'No agent interaction with CI/CD.',
-      'Developers occasionally use agents to write or debug pipelines.',
-      'Code ownership rules protect pipeline config files. Reusable pipeline component library exists. Pipeline authoring guide exists.',
-      'Agents run as isolated CI steps. Outputs are logged and auditable. Agent CI containers are from your artifact registry.',
-      'Agent CI cost and value are measured. Agent-aware gates exist for high-risk PRs. Agents propose pipeline improvements via PRs.',
-      'Agents autonomously maintain CI health (with approval). Pipeline configs generated from intent. Quality parity measured.'
-    ],
-    evidence: [
-      'Code ownership file showing pipeline config protection',
-      'Reusable pipeline component library location',
-      'Agent CI step definition (container image, permissions)',
-      'CI audit log sample',
-      'Cost/time impact data (if Level 4+)'
-    ]
-  },
-  {
-    id: 4,
-    name: 'Infrastructure as Code',
-    description: 'How agents generate, modify, and validate IaC (Terraform, OpenTofu, Pulumi, CloudFormation, etc.).',
-    color: 'var(--color-domain-4)',
-    criteria: [
-      'No IaC or no agent usage for IaC.',
-      'Developers use agents to generate IaC snippets ad hoc.',
-      'Agent instructions include IaC conventions. Linters enforced pre-merge. Wildcard IAM/RBAC prohibited. Regulated/standard modules separated.',
-      'Agents use internal module registry. Plan output posted to PRs. Drift detection runs. Cost estimation runs.',
-      'Policy-as-code (OPA/Sentinel/equivalent) enforced in CI. Production IaC changes require separate approval. Regulatory controls enforced by policy-as-code.',
-      'Agents maintain IaC (upgrades, refactors) with approval. Quality metrics tracked. Agents have read-only infra state access.'
-    ],
-    evidence: [
-      'IaC style guide document',
-      'Linter configuration files in repos',
-      'Agent instruction file with IaC-specific rules',
-      'Regulated vs. standard module separation evidence',
-      'Plan comment automation configuration',
-      'Policy-as-code library (if Level 4+)'
-    ]
-  },
-  {
-    id: 5,
-    name: 'Ops and Incident Response',
-    description: 'How agents assist during incidents, runbooks, and operational tasks.',
-    color: 'var(--color-domain-5)',
-    criteria: [
-      'No agent usage in ops.',
-      'Engineers occasionally use agents during incidents for ad hoc tasks.',
-      'Runbook safety rules exist. Agent ops access is read-only. Incident summaries are reviewed before distribution.',
-      'Agents assist with structured tasks (timelines, log correlation, postmortems). Agent actions are logged. Runbooks include agent steps with handoffs.',
-      'Agents execute pre-approved remediation actions with audit. Incident metrics track agent contribution.',
-      'Agents proactively identify anomalies. Remediation accuracy measured. Postmortems feed back into agent context automatically.'
-    ],
-    evidence: [
-      'Runbook safety rules document',
-      'Access role definition for agent ops access',
-      'Incident log showing agent actions (if Level 3+)',
-      'Approved remediation action list (if Level 4+)',
-      'Incident metrics with agent contribution data (if Level 4+)'
-    ]
-  },
-  {
-    id: 6,
-    name: 'Security and Compliance',
-    description: 'How agent usage meets security policies, data classification, and regulatory requirements.',
-    color: 'var(--color-domain-6)',
-    criteria: [
-      'No policy on agent usage. No awareness of data classification implications.',
-      'Security team is aware. Informal guidance exists.',
-      'Acceptable use policy published. Data classification rules defined. Regulated environment network boundaries enforced. Secrets scanning runs. API keys centrally managed.',
-      'API calls routed through org proxy with logging. Audit logs captured. Quarterly reviews performed. Dependency scanning integrated.',
-      'DLP prevents sensitive data leakage. Automated compliance scanning runs. Agent access governed by least-privilege roles. Exception process exists.',
-      'Controls continuously tuned. Behavioral anomaly detection active. Org contributes to industry standards.'
-    ],
-    evidence: [
-      'Acceptable use policy document',
-      'Data classification matrix for agent usage',
-      'Network boundary documentation for regulated environments',
-      'Secrets scanning configuration evidence',
-      'API gateway/proxy logging configuration (if Level 3+)',
-      'DLP configuration (if Level 4+)'
-    ]
-  },
-  {
-    id: 7,
-    name: 'Knowledge Management',
-    description: 'How agents consume and contribute to org documentation, ADRs, and context.',
-    color: 'var(--color-domain-7)',
-    criteria: [
-      'Sparse or no documentation. Agents have no useful context.',
-      'Developers occasionally point agents at README files.',
-      'Agent instruction files exist per repo. ADRs maintained. Agents know where docs live.',
-      'Doc quality measured. Agents assist with doc maintenance. Searchable doc index exists.',
-      'RAG or knowledge retrieval system available. Curated knowledge base with editorial process. Agent docs merged into canonical base.',
-      'Knowledge base refined by usage patterns. Agents flag knowledge gaps. Cross-team knowledge accessible.'
-    ],
-    evidence: [
-      'Example agent instruction file from active repo',
-      'ADR directory in at least one repo',
-      'Documentation quality metrics (if Level 3+)',
-      'RAG or knowledge retrieval system documentation (if Level 4+)'
-    ]
-  },
-  {
-    id: 8,
-    name: 'Governance',
-    description: 'How the org manages agent access, approvals, audit, and exceptions.',
-    color: 'var(--color-domain-8)',
-    criteria: [
-      'No one owns AI agent strategy.',
-      'Someone informally tracks agent usage.',
-      'Governance body exists. Approved tools list, policy, and exception process maintained. Regulated environment governance addendum exists.',
-      'Regular reporting to leadership. Cost tracked and allocated. Risk register includes agent risks. Vendor assessments done.',
-      'Policy-as-code enforces governance. Cross-functional governance in place. Governance aligns with broader frameworks.',
-      'Governance processes improved by measured outcomes. Regulatory horizon scanning active. Governance is transparent org-wide.'
-    ],
-    evidence: [
-      'Governance body charter or terms of reference',
-      'Decision log for agent-related decisions',
-      'Regulated environment governance addendum',
-      'Leadership report example (if Level 3+)',
-      'Cost allocation data (if Level 3+)'
-    ]
-  },
-  {
-    id: 9,
-    name: 'Evaluation and Measurement',
-    description: 'How the org measures agent value, quality, and risk.',
-    color: 'var(--color-domain-9)',
-    criteria: [
-      'No data on agent usage or impact.',
-      'Anecdotal feedback only.',
-      '5+ KPIs defined. Baselines taken. Developer surveys conducted.',
-      'KPIs measured monthly. Cohort comparisons done. Agent code quality measured.',
-      'All 12+ KPIs active. ROI analysis includes costs and benefits. Measurement drives tool decisions.',
-      'Measurement framework itself is evaluated. Leading indicators tracked. Methodology shared externally.'
-    ],
-    evidence: [
-      'KPI definitions document',
-      'Baseline measurement report',
-      'Developer survey instrument and results',
-      'Monthly KPI report (if Level 3+)',
-      'ROI analysis (if Level 4+)'
-    ]
-  }
-];
+      // ============================================================
+      // STATE
+      // ============================================================
 
-// Roadmap actions: keyed by domain index, then by target level (current+1)
-// Each entry has phases with actions
-var ROADMAP = {
-  0: { // Dev Workflow
-    1: {
-      governance: ['Identify which AI agent tools developers are currently using informally'],
-      tooling: ['Research and shortlist agent tools for evaluation'],
-      standards: ['Draft informal guidance on agent tool usage'],
-      pilot: ['Allow interested developers to use agents on non-critical work'],
-      observe: ['Gather informal feedback on agent usefulness'],
-      evaluate: ['Decide whether to proceed with formal adoption']
-    },
-    2: {
-      governance: ['Publish an approved agent tools list'],
-      tooling: ['Configure org-managed API endpoints for approved tools', 'Add agent tooling to dev environment definitions'],
-      standards: ['Create agent instruction files (e.g., CLAUDE.md) for pilot repos', 'Document API key management procedures'],
-      pilot: ['Deploy configured dev environments to pilot teams'],
-      observe: ['Track which teams adopt the approved tooling'],
-      evaluate: ['Review adoption barriers and adjust tooling']
-    },
-    3: {
-      governance: ['Define telemetry collection requirements and privacy approach'],
-      tooling: ['Build and publish dev environment images through artifact registry', 'Set up agent usage telemetry pipeline'],
-      standards: ['Create standardized agent instruction templates per project type'],
-      pilot: ['Deploy telemetry to pilot repos', 'Curate agent context (docs, not raw repo dumps)'],
-      observe: ['Review telemetry data monthly', 'Monitor template adoption across repos'],
-      evaluate: ['Assess whether telemetry reveals quality or usage patterns worth acting on']
-    },
-    4: {
-      governance: ['Define commit labeling convention for agent-generated code'],
-      tooling: ['Implement auto-labeling of agent-generated commits/PRs', 'Deploy cross-repo context system (RAG or doc index)'],
-      standards: ['Version-control IDE agent configurations', 'Document cross-repo context access patterns'],
-      pilot: ['Roll out labeling and RAG to early-adopter teams'],
-      observe: ['Measure adoption of labeling and cross-repo context usage'],
-      evaluate: ['Evaluate quality of cross-repo context and labeling accuracy']
-    },
-    5: {
-      governance: ['Establish structured pilot process for new agent capabilities'],
-      tooling: ['Build feedback mechanism for developer ratings of agent suggestions'],
-      standards: ['Create per-team agent configuration tuning guidelines'],
-      pilot: ['Run structured pilot for a new agent capability', 'Begin per-team config tuning based on outcomes'],
-      observe: ['Monitor feedback loop data and tuning outcomes'],
-      evaluate: ['Assess whether tuning improves measured quality and velocity']
-    }
-  },
-  1: { // PR and Code Review
-    1: {
-      governance: ['Communicate expectation that agent usage should be disclosed in PRs'],
-      tooling: [],
-      standards: ['Share informal guidance on disclosing agent usage in PR descriptions'],
-      pilot: ['Ask pilot teams to note agent usage in PRs'],
-      observe: ['Review whether disclosure is happening consistently'],
-      evaluate: ['Identify gaps in disclosure practices']
-    },
-    2: {
-      governance: ['Require human approval for all PRs via branch/merge protection'],
-      tooling: ['Add agent disclosure field to PR template'],
-      standards: ['Create agent-specific PR review checklist'],
-      pilot: ['Deploy updated PR templates and checklists to pilot repos'],
-      observe: ['Track checklist completion rates on agent-generated PRs'],
-      evaluate: ['Assess whether checklists improve review quality']
-    },
-    3: {
-      governance: ['Define reviewer guidance for agent-generated code patterns'],
-      tooling: ['Implement auto-labeling of agent PRs via CI or bot', 'Set up PR metrics dashboard segmented by origin'],
-      standards: ['Publish reviewer guidance document (hallucinated imports, over-abstraction, etc.)'],
-      pilot: ['Deploy auto-labeling and segmented metrics to pilot repos'],
-      observe: ['Compare merge time and defect rates: agent vs. human PRs'],
-      evaluate: ['Act on metric differences between agent and human PRs']
-    },
-    4: {
-      governance: ['Define high-risk change categories requiring additional approval'],
-      tooling: ['Configure automated pre-review checks for agent PRs (lint, type-check, coverage, secrets)', 'Set up code ownership rules for high-risk paths'],
-      standards: ['Create structured PR description template showing agent context (prompt, files read, changes)'],
-      pilot: ['Deploy pre-review gates and structured descriptions'],
-      observe: ['Measure pre-review gate catch rate and false positive rate'],
-      evaluate: ['Tune gates based on false positive and defect data']
-    },
-    5: {
-      governance: ['Define expedited review policy with clear boundaries for low-risk agent PRs'],
-      tooling: ['Implement risk scoring for PRs (file sensitivity, blast radius, defect history)', 'Build feedback pipeline from defect data to agent prompts/guardrails'],
-      standards: ['Document risk scoring model and recalibration schedule'],
-      pilot: ['Pilot expedited review path for qualifying PRs'],
-      observe: ['Track defect rates on expedited vs. standard review PRs'],
-      evaluate: ['Recalibrate risk scoring and review expedited review boundaries']
-    }
-  },
-  2: { // CI/CD
-    1: {
-      governance: ['Acknowledge that developers use agents to write/debug pipelines'],
-      tooling: [],
-      standards: ['Share guidance on testing agent-generated pipeline configs before committing'],
-      pilot: ['Allow agents to assist with pipeline writing in pilot repos'],
-      observe: ['Track quality of agent-generated pipeline changes'],
-      evaluate: ['Decide whether to formalize agent CI usage']
-    },
-    2: {
-      governance: ['Establish code ownership rules for pipeline config files'],
-      tooling: ['Create reusable pipeline component library', 'Ensure pipeline config dirs are protected by code ownership'],
-      standards: ['Write pipeline authoring guide for agents', 'Instruct agents to use shared pipeline components'],
-      pilot: ['Deploy code ownership and reusable components to pilot repos'],
-      observe: ['Track whether agents follow pipeline standards'],
-      evaluate: ['Assess reusable component adoption and pipeline quality']
-    },
-    3: {
-      governance: ['Define isolation and permission requirements for agent CI steps'],
-      tooling: ['Build containerized agent CI steps with least-privilege access', 'Publish agent CI containers to artifact registry', 'Configure audit logging for agent CI outputs'],
-      standards: ['Document agent CI step specifications and audit requirements'],
-      pilot: ['Deploy agent CI steps to pilot repos (test generation, linting, doc updates)'],
-      observe: ['Review audit logs for agent CI steps monthly'],
-      evaluate: ['Assess value delivered by agent CI steps vs. pipeline time added']
-    },
-    4: {
-      governance: ['Define agent-aware gates for high-risk PRs in CI'],
-      tooling: ['Set up cost and value dashboard for agent CI steps', 'Configure agent-aware gates that add checks for high-risk agent PRs'],
-      standards: ['Allow agents to propose pipeline improvements as PRs (caching, parallelism)'],
-      pilot: ['Deploy cost tracking and agent-aware gates'],
-      observe: ['Measure cost per run, time impact, and value (bugs caught, tests generated)'],
-      evaluate: ['Decide which agent CI capabilities to expand or retire']
-    },
-    5: {
-      governance: ['Define autonomous maintenance policy with approval requirements'],
-      tooling: ['Enable agents to maintain CI health (dependency updates, flaky test fixes) with PR approval', 'Explore intent-based pipeline definitions'],
-      standards: ['Measure quality parity between agent and human CI contributions'],
-      pilot: ['Pilot autonomous CI maintenance on select repos'],
-      observe: ['Track quality and reliability of autonomous maintenance changes'],
-      evaluate: ['Assess whether autonomous maintenance reduces toil without adding risk']
-    }
-  },
-  3: { // IaC
-    1: {
-      governance: ['Acknowledge that developers use agents for IaC snippet generation'],
-      tooling: [],
-      standards: ['Share guidance on reviewing agent-generated IaC (always run plan)'],
-      pilot: ['Allow agents to generate IaC snippets in pilot projects'],
-      observe: ['Review quality of agent-generated IaC'],
-      evaluate: ['Identify common issues in agent-generated IaC']
-    },
-    2: {
-      governance: ['Prohibit wildcard IAM/RBAC in agent-generated IaC'],
-      tooling: ['Configure linters (tflint, checkov, tfsec) to run pre-merge', 'Separate regulated and standard modules into distinct paths'],
-      standards: ['Add IaC conventions to agent instruction files', 'Document regulated vs. standard module separation'],
-      pilot: ['Deploy linting and agent IaC instructions to pilot repos'],
-      observe: ['Track linter failure rates on agent-generated IaC'],
-      evaluate: ['Assess whether agent instructions reduce IaC issues']
-    },
-    3: {
-      governance: ['Require plan review for all agent-generated IaC PRs'],
-      tooling: ['Set up internal module registry for agents to consume', 'Automate plan output posting to PRs', 'Enable drift detection pipeline', 'Integrate cost estimation (e.g., Infracost)'],
-      standards: ['Instruct agents to use approved module registry instead of raw resources'],
-      pilot: ['Deploy module registry, plan commenting, and cost estimation to pilot repos'],
-      observe: ['Track drift detection findings and cost estimation accuracy'],
-      evaluate: ['Assess module registry adoption and plan review effectiveness']
-    },
-    4: {
-      governance: ['Require separate approval for production IaC changes from infrastructure team'],
-      tooling: ['Implement policy-as-code (OPA/Sentinel) enforcement in CI', 'Automate regulatory control validation'],
-      standards: ['Document which regulatory controls are enforced by policy-as-code vs. manual review'],
-      pilot: ['Deploy policy-as-code enforcement to repos with IaC'],
-      observe: ['Track policy violation rates and false positive rates'],
-      evaluate: ['Tune policy-as-code rules based on violation and false positive data']
-    },
-    5: {
-      governance: ['Define approval gates for autonomous IaC maintenance (upgrades, refactors)'],
-      tooling: ['Enable agents to maintain IaC (provider upgrades, deprecated resource refactoring)', 'Provide agents read-only infrastructure state access'],
-      standards: ['Track IaC generation quality metrics (plan accuracy, policy violations, rework rate)'],
-      pilot: ['Pilot autonomous IaC maintenance on non-production modules'],
-      observe: ['Measure quality metrics for autonomous IaC changes'],
-      evaluate: ['Decide whether to expand autonomous IaC maintenance scope']
-    }
-  },
-  4: { // Ops and Incident Response
-    1: {
-      governance: ['Acknowledge that engineers use agents during incidents informally'],
-      tooling: [],
-      standards: ['Share guidance on verifying agent suggestions during incidents'],
-      pilot: ['Allow agents for log searching and incident summary drafting'],
-      observe: ['Gather feedback on agent usefulness during incidents'],
-      evaluate: ['Identify risks and benefits of agent use in ops']
-    },
-    2: {
-      governance: ['Publish runbook safety rules for agent usage during incidents'],
-      tooling: ['Configure read-only access roles for agents in ops contexts', 'Set up incident summary review workflow'],
-      standards: ['Create incident summary review checklist', 'Document that agents must not have write access to production'],
-      pilot: ['Deploy runbook safety rules and read-only access to pilot teams'],
-      observe: ['Track adherence to safety rules during incidents'],
-      evaluate: ['Assess whether safety rules are practical and followed']
-    },
-    3: {
-      governance: ['Define requirements for logging all agent actions during incidents'],
-      tooling: ['Enable agents for structured incident tasks (timelines, log correlation, draft postmortems)', 'Configure agent action audit logging during incidents'],
-      standards: ['Add agent-assisted steps to runbooks with clear handoff points', 'Create postmortem template with agent-contribution section'],
-      pilot: ['Deploy agent-assisted runbooks to pilot SRE teams'],
-      observe: ['Review agent action logs for quality and appropriateness', 'Track whether agent assistance improves or hinders incident response'],
-      evaluate: ['Refine runbook agent steps based on incident outcomes']
-    },
-    4: {
-      governance: ['Define and approve list of permitted agent remediation actions'],
-      tooling: ['Build controlled interface for pre-approved agent remediation actions', 'Set up approval and audit trail for agent-executed remediations'],
-      standards: ['Document incident metrics that track agent contribution (time-to-detection, time-to-mitigation)'],
-      pilot: ['Pilot agent remediation actions (restart service, scale up, toggle feature flag) with approval'],
-      observe: ['Measure agent remediation accuracy and time savings', 'Review audit trails for compliance'],
-      evaluate: ['Expand or contract approved action list based on accuracy data']
-    },
-    5: {
-      governance: ['Define policies for proactive agent anomaly detection and alerting'],
-      tooling: ['Integrate agents with anomaly detection systems for proactive identification', 'Automate postmortem-to-runbook feedback pipeline'],
-      standards: ['Measure remediation accuracy and use it to adjust approved actions'],
-      pilot: ['Pilot proactive anomaly detection with agent alerting'],
-      observe: ['Track false positive rate and actionability of proactive alerts'],
-      evaluate: ['Assess whether proactive capabilities reduce incident frequency']
-    }
-  },
-  5: { // Security and Compliance
-    1: {
-      governance: ['Ensure security team is aware of AI agent usage across the org'],
-      tooling: [],
-      standards: ['Share informal guidance about not pasting secrets or PII into agent prompts'],
-      pilot: ['Communicate basic data handling expectations to developers using agents'],
-      observe: ['Monitor for reports of sensitive data exposure through agents'],
-      evaluate: ['Determine urgency of formal policy creation']
-    },
-    2: {
-      governance: ['Publish acceptable use policy for AI agents', 'Define data classification rules for agent interactions'],
-      tooling: ['Configure secrets scanning on all repos with agent usage', 'Set up centralized API key management', 'Enforce regulated environment network boundaries for AI endpoints'],
-      standards: ['Create data classification matrix for agent usage', 'Document regulated environment restrictions'],
-      pilot: ['Deploy secrets scanning and centralized key management to pilot repos'],
-      observe: ['Track secrets scanning findings', 'Audit API key usage patterns'],
-      evaluate: ['Assess policy coverage and identify gaps']
-    },
-    3: {
-      governance: ['Establish quarterly review process for agent usage logs'],
-      tooling: ['Route all agent API calls through org proxy/gateway with logging', 'Set up audit log pipeline to SIEM', 'Integrate dependency scanning for agent-suggested packages'],
-      standards: ['Document audit log retention and review procedures', 'Define supply chain security requirements for agent-suggested dependencies'],
-      pilot: ['Deploy API gateway logging and dependency scanning'],
-      observe: ['Conduct first quarterly audit review', 'Track policy violation findings'],
-      evaluate: ['Remediate findings and adjust proxy/scanning configuration']
-    },
-    4: {
-      governance: ['Create exception process for cases requiring agent access to restricted data/systems'],
-      tooling: ['Deploy DLP controls to prevent sensitive data reaching agent endpoints', 'Implement automated compliance scanning for agent-generated code', 'Configure least-privilege access roles for agents per repo/team'],
-      standards: ['Document exception request process and approval workflow', 'Define access role specifications for agent usage'],
-      pilot: ['Deploy DLP and compliance scanning', 'Process first exception requests through formal workflow'],
-      observe: ['Measure DLP false positive rate', 'Track compliance scanning findings'],
-      evaluate: ['Tune DLP and scanning rules to reduce false positives while maintaining coverage']
-    },
-    5: {
-      governance: ['Establish continuous security control tuning process based on threat intelligence'],
-      tooling: ['Deploy behavioral anomaly detection for agent usage patterns', 'Automate security control adjustment based on audit findings'],
-      standards: ['Contribute to industry standards for AI agent security', 'Document control tuning rationale and changes'],
-      pilot: ['Pilot anomaly detection and share learnings with industry peers'],
-      observe: ['Monitor anomaly detection alert quality and response times'],
-      evaluate: ['Assess whether continuous tuning reduces real risk vs. adding noise']
-    }
-  },
-  6: { // Knowledge Management
-    1: {
-      governance: ['Encourage developers to give agents useful context (README, docs)'],
-      tooling: [],
-      standards: ['Identify key documentation that agents should reference'],
-      pilot: ['Have pilot developers point agents at README and key docs'],
-      observe: ['Gather feedback on whether available docs help agent output quality'],
-      evaluate: ['Identify documentation gaps that hurt agent effectiveness']
-    },
-    2: {
-      governance: ['Require agent instruction files in every active repo'],
-      tooling: ['Configure agents to know where documentation lives'],
-      standards: ['Create agent instruction files per repo with project description, conventions, architecture', 'Establish ADR practice in at least key repos'],
-      pilot: ['Deploy agent instruction files and ADRs to pilot repos'],
-      observe: ['Track whether instruction files improve agent output relevance'],
-      evaluate: ['Refine instruction file templates based on pilot feedback']
-    },
-    3: {
-      governance: ['Define documentation quality metrics (coverage, freshness, satisfaction)'],
-      tooling: ['Build searchable documentation index for agents', 'Enable agents to assist with doc maintenance (update READMEs, flag stale docs)'],
-      standards: ['Create agent-assisted doc maintenance workflow with human review', 'Define doc quality measurement approach'],
-      pilot: ['Deploy doc index and agent doc maintenance to pilot repos'],
-      observe: ['Measure documentation quality improvements', 'Review agent-generated doc updates for accuracy'],
-      evaluate: ['Assess whether agent doc maintenance improves freshness without reducing accuracy']
-    },
-    4: {
-      governance: ['Establish editorial process for curated knowledge base'],
-      tooling: ['Deploy RAG or knowledge retrieval system for agents', 'Build pipeline to merge reviewed agent docs into canonical knowledge base'],
-      standards: ['Define knowledge base content standards and review workflow', 'Curate knowledge base with org standards, approved patterns, incident learnings'],
-      pilot: ['Connect agents to RAG system', 'Process first batch of agent-generated docs through editorial review'],
-      observe: ['Measure RAG retrieval relevance and accuracy'],
-      evaluate: ['Tune RAG configuration and editorial process based on quality data']
-    },
-    5: {
-      governance: ['Define cross-team knowledge access policies respecting data classification'],
-      tooling: ['Build knowledge gap tracking system', 'Enable agents to flag questions they cannot answer from available context', 'Allow agents to synthesize documentation across teams'],
-      standards: ['Create knowledge base refinement changelog', 'Document cross-team access boundaries'],
-      pilot: ['Pilot cross-team knowledge access and gap tracking'],
-      observe: ['Monitor knowledge gap identification and resolution rates'],
-      evaluate: ['Assess whether gap tracking drives meaningful documentation improvements']
-    }
-  },
-  7: { // Governance
-    1: {
-      governance: ['Assign at least one person to informally track AI agent usage and interest'],
-      tooling: [],
-      standards: ['Create basic tracking mechanism (spreadsheet, chat channel) for agent usage'],
-      pilot: ['Begin informal coordination across teams evaluating agents'],
-      observe: ['Monitor for shadow IT and uncoordinated evaluation efforts'],
-      evaluate: ['Determine if formal governance is needed based on adoption velocity']
-    },
-    2: {
-      governance: ['Form AI agent governance body (working group)', 'Publish approved tools list and acceptable use policy', 'Create exception process for agent usage outside standard policy'],
-      tooling: ['Set up decision log for agent-related governance decisions'],
-      standards: ['Write governance body charter or terms of reference', 'Create regulated environment governance addendum'],
-      pilot: ['Operate governance process with pilot teams', 'Process first exception requests'],
-      observe: ['Track governance decision throughput and team satisfaction'],
-      evaluate: ['Assess whether governance enables rather than blocks adoption']
-    },
-    3: {
-      governance: ['Establish regular reporting to leadership (monthly or quarterly)', 'Add AI agent risks to org risk register'],
-      tooling: ['Set up cost tracking and allocation by team/project', 'Conduct vendor assessments for AI agent providers'],
-      standards: ['Create leadership report template', 'Define cost allocation methodology'],
-      pilot: ['Deliver first leadership report', 'Complete vendor assessment for primary agent provider'],
-      observe: ['Track whether leadership engages with reports', 'Monitor cost allocation accuracy'],
-      evaluate: ['Refine reporting based on leadership feedback']
-    },
-    4: {
-      governance: ['Establish cross-functional governance with engineering, security, legal, compliance', 'Align agent governance with broader IT and data governance frameworks'],
-      tooling: ['Implement policy-as-code to enforce agent boundaries', 'Automate approval workflows'],
-      standards: ['Document governance framework alignment', 'Create cross-functional meeting cadence and decision process'],
-      pilot: ['Deploy policy-as-code enforcement', 'Hold first cross-functional governance session'],
-      observe: ['Track policy-as-code enforcement outcomes (blocks, exceptions)', 'Monitor governance overhead vs. value'],
-      evaluate: ['Tune automated governance to reduce false blocks while maintaining oversight']
-    },
-    5: {
-      governance: ['Implement regulatory horizon scanning for upcoming AI regulations', 'Make all governance decisions transparent and communicated org-wide'],
-      tooling: ['Build governance improvement tracking based on measured outcomes (adoption rate, incidents, compliance)'],
-      standards: ['Document governance improvement process and changelog', 'Create org-wide governance communication plan'],
-      pilot: ['Publish first governance transparency report', 'Conduct first regulatory horizon scan'],
-      observe: ['Monitor whether governance improvements correlate with better outcomes'],
-      evaluate: ['Assess governance maturity and plan next evolution cycle']
-    }
-  },
-  8: { // Evaluation and Measurement
-    1: {
-      governance: ['Decide to begin collecting data on agent usage and impact'],
-      tooling: [],
-      standards: ['Create simple feedback channel for developers to share agent experiences'],
-      pilot: ['Gather anecdotal feedback from agent users'],
-      observe: ['Review feedback themes and patterns'],
-      evaluate: ['Determine whether to invest in formal measurement']
-    },
-    2: {
-      governance: ['Define 5+ KPIs for agent adoption and effectiveness'],
-      tooling: ['Set up baseline measurement collection infrastructure'],
-      standards: ['Create KPI definitions document', 'Design developer survey instrument'],
-      pilot: ['Collect baseline measurements before expanding agent usage', 'Conduct first developer survey'],
-      observe: ['Review baseline data quality and completeness'],
-      evaluate: ['Validate that chosen KPIs are measurable and meaningful']
-    },
-    3: {
-      governance: ['Establish monthly KPI measurement and reporting cadence'],
-      tooling: ['Set up cohort comparison infrastructure (agent vs. non-agent teams)', 'Build agent code quality measurement pipeline'],
-      standards: ['Define cohort comparison methodology', 'Create monthly KPI report template'],
-      pilot: ['Begin monthly KPI measurement', 'Run first cohort comparison'],
-      observe: ['Track KPI trends monthly', 'Review cohort comparison for confounding factors'],
-      evaluate: ['Act on KPI findings -- adjust tools, training, or processes based on data']
-    },
-    4: {
-      governance: ['Expand to all 12+ KPIs', 'Require measurement-driven justification for tool decisions'],
-      tooling: ['Build full KPI dashboard', 'Set up ROI analysis pipeline (direct costs, indirect costs, benefits)'],
-      standards: ['Create ROI analysis methodology', 'Document how measurements drive decisions'],
-      pilot: ['Complete first ROI analysis', 'Make at least one measurement-driven tool decision'],
-      observe: ['Track all KPIs and review quarterly', 'Document decisions driven by measurement data'],
-      evaluate: ['Assess whether measurement overhead is justified by decision quality']
-    },
-    5: {
-      governance: ['Evaluate and improve the measurement framework itself', 'Define leading indicators (not just lagging)'],
-      tooling: ['Build leading indicator tracking', 'Prepare anonymized results for external sharing'],
-      standards: ['Document measurement framework review process', 'Create publishable case study or methodology report'],
-      pilot: ['Track leading indicators alongside standard KPIs', 'Share methodology or results externally'],
-      observe: ['Assess predictive value of leading indicators'],
-      evaluate: ['Refine measurement framework and plan next evolution']
-    }
-  }
-};
+      var scores = [-1, -1, -1, -1, -1, -1, -1, -1, -1];
+      var currentDomain = 0;
 
-var INTERPRETATION = [
-  { min: 0, max: 0.9, title: 'No meaningful adoption', text: 'The organization either prohibits agents or is unaware of usage.', action: 'Start with awareness and a small pilot. Establish basic policy.' },
-  { min: 1, max: 1.9, title: 'Early exploration', text: 'Individual usage exists but is ungoverned. Risk is unmanaged.', action: 'Prioritize governance (policy, approved tools) and security (data classification, key management).' },
-  { min: 2, max: 2.9, title: 'Foundation in place', text: 'Policies and tooling exist but are not yet instrumented or measured.', action: 'Focus on instrumentation (telemetry, metrics, audit logs) and standardization (templates, reusable components).' },
-  { min: 3, max: 3.9, title: 'Instrumented and managed', text: 'The org has visibility into agent usage and quality. Workflows are standardized.', action: 'Optimize: embed agents deeper in CI/CD and IaC, automate governance, invest in advanced capabilities (RAG, risk scoring).' },
-  { min: 4, max: 4.9, title: 'Well-optimized', text: 'Agents are integrated across the SDLC with automated governance and measurement.', action: 'Move toward adaptive: continuous tuning, proactive capabilities, industry leadership.' },
-  { min: 5, max: 5, title: 'Adaptive', text: 'Continuous improvement across all domains.', action: 'Maintain and share learnings. Watch for complacency.' }
-];
+      // ============================================================
+      // SCREEN MANAGEMENT
+      // ============================================================
 
-// ============================================================
-// STATE
-// ============================================================
+      function showScreen(id) {
+        document.querySelectorAll(".screen").forEach(function (s) {
+          s.classList.remove("active");
+        });
+        document.getElementById(id).classList.add("active");
+      }
 
-var scores = [-1, -1, -1, -1, -1, -1, -1, -1, -1];
-var currentDomain = 0;
+      function startAssessment() {
+        currentDomain = 0;
+        scores = [-1, -1, -1, -1, -1, -1, -1, -1, -1];
+        showScreen("assessment-screen");
+        renderDomain();
+      }
 
-// ============================================================
-// SCREEN MANAGEMENT
-// ============================================================
+      function restartAssessment() {
+        showScreen("welcome-screen");
+      }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById(id).classList.add('active');
-}
+      // ============================================================
+      // ASSESSMENT NAVIGATION
+      // ============================================================
 
-function startAssessment() {
-  currentDomain = 0;
-  scores = [-1, -1, -1, -1, -1, -1, -1, -1, -1];
-  showScreen('assessment-screen');
-  renderDomain();
-}
+      function renderDomain() {
+        var d = DOMAINS[currentDomain];
+        var pct = Math.round(((currentDomain + 1) / 9) * 100);
+        document.getElementById("progress-label").textContent =
+          "Domain " + (currentDomain + 1) + " of 9";
+        document.getElementById("progress-percent").textContent = pct + "%";
+        document.getElementById("progress-fill").style.width = pct + "%";
 
-function restartAssessment() {
-  showScreen('welcome-screen');
-}
+        var html = '<div class="assessment-card">';
+        html += '<div class="domain-header">';
+        html +=
+          '<span class="domain-badge" style="background:' +
+          d.color +
+          '">Domain ' +
+          d.id +
+          "</span>";
+        html += "<h2>" + d.name + "</h2>";
+        html += "<p>" + d.description + "</p>";
+        html += "</div>";
 
-// ============================================================
-// ASSESSMENT NAVIGATION
-// ============================================================
+        html += '<div class="level-options">';
+        for (var i = 0; i <= 5; i++) {
+          var sel = scores[currentDomain] === i ? " selected" : "";
+          var chk = scores[currentDomain] === i ? " checked" : "";
+          html +=
+            '<label class="level-option' +
+            sel +
+            '" onclick="selectLevel(' +
+            currentDomain +
+            "," +
+            i +
+            ')">';
+          html +=
+            '<input type="radio" name="level" value="' + i + '"' + chk + ">";
+          html +=
+            '<div><div class="level-label">Level ' +
+            i +
+            " -- " +
+            LEVEL_NAMES[i] +
+            "</div>";
+          html +=
+            '<div class="level-criteria">' + d.criteria[i] + "</div></div>";
+          html += "</label>";
+        }
+        html += "</div>";
 
-function renderDomain() {
-  var d = DOMAINS[currentDomain];
-  var pct = Math.round(((currentDomain + 1) / 9) * 100);
-  document.getElementById('progress-label').textContent = 'Domain ' + (currentDomain + 1) + ' of 9';
-  document.getElementById('progress-percent').textContent = pct + '%';
-  document.getElementById('progress-fill').style.width = pct + '%';
+        // Evidence hints
+        html +=
+          '<button class="evidence-toggle" onclick="toggleEvidence(this)"><span class="arrow">&#9654;</span> Evidence to look for</button>';
+        html += '<div class="evidence-content"><ul>';
+        for (var j = 0; j < d.evidence.length; j++) {
+          html += "<li>" + d.evidence[j] + "</li>";
+        }
+        html += "</ul></div>";
 
-  var html = '<div class="assessment-card">';
-  html += '<div class="domain-header">';
-  html += '<span class="domain-badge" style="background:' + d.color + '">Domain ' + d.id + '</span>';
-  html += '<h2>' + d.name + '</h2>';
-  html += '<p>' + d.description + '</p>';
-  html += '</div>';
+        html += "</div>";
+        document.getElementById("assessment-content").innerHTML = html;
 
-  html += '<div class="level-options">';
-  for (var i = 0; i <= 5; i++) {
-    var sel = scores[currentDomain] === i ? ' selected' : '';
-    var chk = scores[currentDomain] === i ? ' checked' : '';
-    html += '<label class="level-option' + sel + '" onclick="selectLevel(' + currentDomain + ',' + i + ')">';
-    html += '<input type="radio" name="level" value="' + i + '"' + chk + '>';
-    html += '<div><div class="level-label">Level ' + i + ' -- ' + LEVEL_NAMES[i] + '</div>';
-    html += '<div class="level-criteria">' + d.criteria[i] + '</div></div>';
-    html += '</label>';
-  }
-  html += '</div>';
-
-  // Evidence hints
-  html += '<button class="evidence-toggle" onclick="toggleEvidence(this)"><span class="arrow">&#9654;</span> Evidence to look for</button>';
-  html += '<div class="evidence-content"><ul>';
-  for (var j = 0; j < d.evidence.length; j++) {
-    html += '<li>' + d.evidence[j] + '</li>';
-  }
-  html += '</ul></div>';
-
-  html += '</div>';
-  document.getElementById('assessment-content').innerHTML = html;
-
-  // Nav button state
-  document.getElementById('btn-back').style.visibility = currentDomain === 0 ? 'hidden' : 'visible';
-  var nextBtn = document.getElementById('btn-next');
-  if (currentDomain === 8) {
-    nextBtn.textContent = 'View Results';
-  } else {
-    nextBtn.textContent = 'Next';
-  }
-}
-
-function selectLevel(domain, level) {
-  scores[domain] = level;
-  // Update visual state
-  var options = document.querySelectorAll('.level-option');
-  options.forEach(function(opt) { opt.classList.remove('selected'); });
-  options[level].classList.add('selected');
-  options[level].querySelector('input').checked = true;
-}
-
-function toggleEvidence(btn) {
-  btn.classList.toggle('open');
-  var content = btn.nextElementSibling;
-  content.classList.toggle('open');
-}
-
-function nextDomain() {
-  if (scores[currentDomain] < 0) {
-    showToast('Please select a level before continuing.');
-    return;
-  }
-  if (currentDomain < 8) {
-    currentDomain++;
-    renderDomain();
-    window.scrollTo(0, 0);
-  } else {
-    showResults();
-  }
-}
-
-function prevDomain() {
-  if (currentDomain > 0) {
-    currentDomain--;
-    renderDomain();
-    window.scrollTo(0, 0);
-  }
-}
-
-// ============================================================
-// RESULTS
-// ============================================================
-
-function showResults() {
-  showScreen('results-screen');
-  document.getElementById('print-date').textContent = 'Generated ' + new Date().toLocaleDateString();
-
-  var avg = scores.reduce(function(a, b) { return a + b; }, 0) / 9;
-  avg = Math.round(avg * 10) / 10;
-
-  renderOverallScore(avg);
-  renderWarnings(avg);
-  renderScoreTable();
-  drawRadarChart();
-  renderPlan(avg);
-  initTabs();
-  window.scrollTo(0, 0);
-}
-
-function renderOverallScore(avg) {
-  var interp = INTERPRETATION.find(function(i) { return avg >= i.min && avg <= i.max; });
-  var color = avg < 2 ? 'var(--color-red)' : avg < 4 ? 'var(--color-yellow)' : 'var(--color-green)';
-
-  var html = '<div class="score-value" style="color:' + color + '">' + avg.toFixed(1) + '</div>';
-  html += '<div class="score-label">Overall Maturity Score (0-5)</div>';
-  if (interp) {
-    html += '<div class="score-interpretation">';
-    html += '<div class="interpretation-title">' + interp.title + '</div>';
-    html += '<p>' + interp.text + '</p>';
-    html += '<p style="margin-top:8px;font-weight:500">' + interp.action + '</p>';
-    html += '</div>';
-  }
-  document.getElementById('overall-section').innerHTML = html;
-}
-
-function renderWarnings(avg) {
-  var container = document.getElementById('warnings-container');
-  var html = '';
-
-  // Security warning
-  if (scores[5] < 2) {
-    html += '<div class="callout callout-red"><strong>Security and Compliance is below Level 2</strong>Stop expanding agent usage until Security and Compliance reaches Level 2. Without basic policies, data classification, and secrets scanning, agent usage poses unmanaged risk.</div>';
-  }
-
-  // Governance warning
-  if (scores[7] < 2) {
-    html += '<div class="callout callout-red"><strong>Governance is below Level 2</strong>Policy enforcement is likely absent. Other domain scores may be unreliable without a governance body and approved tools list.</div>';
-  }
-
-  // Critical gaps
-  var gaps = [];
-  for (var i = 0; i < 9; i++) {
-    if (avg - scores[i] >= 2) {
-      gaps.push(DOMAINS[i].name + ' (Level ' + scores[i] + ', ' + (avg - scores[i]).toFixed(1) + ' below average)');
-    }
-  }
-  if (gaps.length > 0) {
-    html += '<div class="callout callout-yellow"><strong>Critical gaps detected (2+ levels below average)</strong>' + gaps.join('<br>') + '</div>';
-  }
-
-  // All good
-  if (!html) {
-    var minScore = Math.min.apply(null, scores);
-    if (minScore >= 3) {
-      html = '<div class="callout callout-green"><strong>No critical gaps detected</strong>All domains are at Level 3 or above. Focus on optimization and continuous improvement.</div>';
-    }
-  }
-
-  container.innerHTML = html;
-}
-
-function renderScoreTable() {
-  var html = '<thead><tr><th>Domain</th><th>Level</th><th class="score-cell">Score</th></tr></thead><tbody>';
-  for (var i = 0; i < 9; i++) {
-    var d = DOMAINS[i];
-    var s = scores[i];
-    var color = s < 2 ? 'var(--color-red)' : s < 4 ? 'var(--color-yellow)' : 'var(--color-green)';
-    html += '<tr>';
-    html += '<td><span class="score-dot" style="background:' + d.color + '"></span>' + d.name + '</td>';
-    html += '<td class="level-name-cell">' + LEVEL_NAMES[s] + '</td>';
-    html += '<td class="score-cell" style="color:' + color + '">' + s + '</td>';
-    html += '</tr>';
-  }
-  html += '</tbody>';
-  document.getElementById('score-table').innerHTML = html;
-}
-
-// ============================================================
-// RADAR CHART (hand-drawn Canvas)
-// ============================================================
-
-function drawRadarChart() {
-  var canvas = document.getElementById('radar-canvas');
-  var dpr = window.devicePixelRatio || 1;
-  var size = 560;
-  canvas.width = size * dpr;
-  canvas.height = size * dpr;
-  canvas.style.width = size + 'px';
-  canvas.style.height = size + 'px';
-  var ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  var cx = size / 2;
-  var cy = size / 2;
-  var maxR = 200;
-  var n = 9;
-  var angleStep = (2 * Math.PI) / n;
-  var startAngle = -Math.PI / 2; // top
-
-  // Grid
-  ctx.strokeStyle = '#e5e7eb';
-  ctx.lineWidth = 1;
-  for (var level = 1; level <= 5; level++) {
-    var r = (level / 5) * maxR;
-    ctx.beginPath();
-    for (var i = 0; i <= n; i++) {
-      var angle = startAngle + i * angleStep;
-      var x = cx + r * Math.cos(angle);
-      var y = cy + r * Math.sin(angle);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.stroke();
-  }
-
-  // Spokes
-  ctx.strokeStyle = '#d1d5db';
-  ctx.lineWidth = 1;
-  for (var i = 0; i < n; i++) {
-    var angle = startAngle + i * angleStep;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle));
-    ctx.stroke();
-  }
-
-  // Level labels on first axis
-  ctx.fillStyle = '#9ca3af';
-  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.textAlign = 'center';
-  for (var level = 1; level <= 5; level++) {
-    var r = (level / 5) * maxR;
-    var x = cx + r * Math.cos(startAngle) - 14;
-    var y = cy + r * Math.sin(startAngle) + 4;
-    ctx.fillText(level.toString(), x, y);
-  }
-
-  // Data polygon
-  ctx.beginPath();
-  for (var i = 0; i < n; i++) {
-    var angle = startAngle + i * angleStep;
-    var r = (scores[i] / 5) * maxR;
-    var x = cx + r * Math.cos(angle);
-    var y = cy + r * Math.sin(angle);
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(37, 99, 235, 0.8)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Data points
-  for (var i = 0; i < n; i++) {
-    var angle = startAngle + i * angleStep;
-    var r = (scores[i] / 5) * maxR;
-    var x = cx + r * Math.cos(angle);
-    var y = cy + r * Math.sin(angle);
-    ctx.beginPath();
-    ctx.arc(x, y, 4, 0, 2 * Math.PI);
-    ctx.fillStyle = '#2563eb';
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-
-  // Axis labels
-  ctx.fillStyle = '#374151';
-  ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
-  var labelPadding = 28;
-  for (var i = 0; i < n; i++) {
-    var angle = startAngle + i * angleStep;
-    var lx = cx + (maxR + labelPadding) * Math.cos(angle);
-    var ly = cy + (maxR + labelPadding) * Math.sin(angle);
-
-    // Adjust alignment based on position
-    var cosA = Math.cos(angle);
-    var sinA = Math.sin(angle);
-    if (cosA > 0.3) ctx.textAlign = 'left';
-    else if (cosA < -0.3) ctx.textAlign = 'right';
-    else ctx.textAlign = 'center';
-
-    if (sinA < -0.3) ly += 0;
-    else if (sinA > 0.3) ly += 10;
-    else ly += 4;
-
-    // Wrap long labels
-    var label = DOMAINS[i].name;
-    var words = label.split(' ');
-    if (words.length > 2) {
-      var mid = Math.ceil(words.length / 2);
-      var line1 = words.slice(0, mid).join(' ');
-      var line2 = words.slice(mid).join(' ');
-      ctx.fillText(line1, lx, ly - 7);
-      ctx.fillText(line2, lx, ly + 7);
-    } else {
-      ctx.fillText(label, lx, ly);
-    }
-  }
-}
-
-// ============================================================
-// 90-DAY PLAN GENERATION
-// ============================================================
-
-function renderPlan(avg) {
-  // 1. Sort domains by score ascending
-  var indexed = scores.map(function(s, i) { return { idx: i, score: s }; });
-  indexed.sort(function(a, b) { return a.score - b.score; });
-
-  // 2. Force Security (idx 5) to top if < 2
-  // 3. Force Governance (idx 7) to second if < 2
-  var priorities = [];
-  var secIdx = -1, govIdx = -1;
-  for (var i = 0; i < indexed.length; i++) {
-    if (indexed[i].idx === 5) secIdx = i;
-    if (indexed[i].idx === 7) govIdx = i;
-  }
-
-  if (scores[5] < 2) {
-    priorities.push({ idx: 5, score: scores[5] });
-    indexed = indexed.filter(function(x) { return x.idx !== 5; });
-  }
-  if (scores[7] < 2) {
-    priorities.push({ idx: 7, score: scores[7] });
-    indexed = indexed.filter(function(x) { return x.idx !== 7; });
-  }
-
-  // Fill remaining priorities from lowest scores
-  for (var i = 0; i < indexed.length && priorities.length < 3; i++) {
-    if (indexed[i].score < 5) {
-      priorities.push(indexed[i]);
-    }
-  }
-
-  if (priorities.length === 0) {
-    document.getElementById('plan-content').innerHTML = '<div class="callout callout-green"><strong>All domains at Level 5</strong>Your organization has achieved the highest maturity level across all domains. Focus on maintaining practices and sharing learnings.</div>';
-    return;
-  }
-
-  var phaseNames = [
-    { key: 'governance', label: 'Weeks 1-2: Governance and Policy', weeks: '1-2' },
-    { key: 'tooling', label: 'Weeks 2-4: Tooling and Infrastructure', weeks: '2-4' },
-    { key: 'standards', label: 'Weeks 3-5: Standards and Context', weeks: '3-5' },
-    { key: 'pilot', label: 'Weeks 4-6: Pilot Launch', weeks: '4-6' },
-    { key: 'observe', label: 'Weeks 6-10: Observation and Measurement', weeks: '6-10' },
-    { key: 'evaluate', label: 'Weeks 10-13: Evaluation and Next Steps', weeks: '10-13' }
-  ];
-
-  var html = '';
-
-  // Priority summary
-  html += '<div style="margin-bottom:20px">';
-  for (var p = 0; p < priorities.length; p++) {
-    var pr = priorities[p];
-    var target = Math.min(pr.score + 1, 5);
-    html += '<span class="priority-badge priority-' + (p + 1) + '">P' + (p + 1) + '</span>';
-    html += '<strong>' + DOMAINS[pr.idx].name + '</strong> -- Level ' + pr.score + ' (' + LEVEL_NAMES[pr.score] + ') to Level ' + target + ' (' + LEVEL_NAMES[target] + ')';
-    html += '<br style="margin-bottom:6px">';
-  }
-  html += '</div>';
-
-  // Build phases
-  for (var ph = 0; ph < phaseNames.length; ph++) {
-    var phase = phaseNames[ph];
-    var actions = [];
-
-    for (var p = 0; p < priorities.length; p++) {
-      var pr = priorities[p];
-      var target = Math.min(pr.score + 1, 5);
-      var roadmap = ROADMAP[pr.idx];
-      if (roadmap && roadmap[target] && roadmap[target][phase.key]) {
-        var items = roadmap[target][phase.key];
-        for (var a = 0; a < items.length; a++) {
-          actions.push({ priority: p + 1, domain: DOMAINS[pr.idx].name, action: items[a] });
+        // Nav button state
+        document.getElementById("btn-back").style.visibility =
+          currentDomain === 0 ? "hidden" : "visible";
+        var nextBtn = document.getElementById("btn-next");
+        if (currentDomain === 8) {
+          nextBtn.textContent = "View Results";
+        } else {
+          nextBtn.textContent = "Next";
         }
       }
-    }
 
-    if (actions.length === 0) continue;
+      function selectLevel(domain, level) {
+        scores[domain] = level;
+        // Update visual state
+        var options = document.querySelectorAll(".level-option");
+        options.forEach(function (opt) {
+          opt.classList.remove("selected");
+        });
+        options[level].classList.add("selected");
+        options[level].querySelector("input").checked = true;
+      }
 
-    html += '<div class="plan-phase">';
-    html += '<h3>' + phase.label + '</h3>';
-    html += '<table class="plan-table"><thead><tr><th style="width:36px"></th><th>Domain</th><th>Action</th></tr></thead><tbody>';
-    for (var a = 0; a < actions.length; a++) {
-      var act = actions[a];
-      html += '<tr>';
-      html += '<td><span class="priority-badge priority-' + act.priority + '">P' + act.priority + '</span></td>';
-      html += '<td>' + act.domain + '</td>';
-      html += '<td>' + act.action + '</td>';
-      html += '</tr>';
-    }
-    html += '</tbody></table></div>';
-  }
+      function toggleEvidence(btn) {
+        btn.classList.toggle("open");
+        var content = btn.nextElementSibling;
+        content.classList.toggle("open");
+      }
 
-  document.getElementById('plan-content').innerHTML = html;
-}
+      function nextDomain() {
+        if (scores[currentDomain] < 0) {
+          showToast("Please select a level before continuing.");
+          return;
+        }
+        if (currentDomain < 8) {
+          currentDomain++;
+          renderDomain();
+          window.scrollTo(0, 0);
+        } else {
+          showResults();
+        }
+      }
 
-// ============================================================
-// TABS
-// ============================================================
+      function prevDomain() {
+        if (currentDomain > 0) {
+          currentDomain--;
+          renderDomain();
+          window.scrollTo(0, 0);
+        }
+      }
 
-function initTabs() {
-  document.querySelectorAll('.tab-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.tab).classList.add('active');
-    });
-  });
-}
+      // ============================================================
+      // RESULTS
+      // ============================================================
 
-// ============================================================
-// EXPORT
-// ============================================================
+      function showResults() {
+        showScreen("results-screen");
+        document.getElementById("print-date").textContent =
+          "Generated " + new Date().toLocaleDateString();
 
-function generateMarkdownContent() {
-  var avg = scores.reduce(function(a, b) { return a + b; }, 0) / 9;
-  avg = Math.round(avg * 10) / 10;
-  var interp = INTERPRETATION.find(function(i) { return avg >= i.min && avg <= i.max; });
+        var avg =
+          scores.reduce(function (a, b) {
+            return a + b;
+          }, 0) / 9;
+        avg = Math.round(avg * 10) / 10;
 
-  var md = '# AI Agent CMM Assessment Results\n\n';
-  md += 'Generated: ' + new Date().toLocaleDateString() + '\n\n';
+        renderOverallScore(avg);
+        renderWarnings(avg);
+        renderScoreTable();
+        drawRadarChart();
+        renderPlan(avg);
+        initTabs();
+        window.scrollTo(0, 0);
+      }
 
-  md += '## Overall Score: ' + avg.toFixed(1) + ' / 5.0\n\n';
-  if (interp) {
-    md += '**' + interp.title + '**: ' + interp.text + '\n\n';
-    md += '**Recommended action**: ' + interp.action + '\n\n';
-  }
+      function renderOverallScore(avg) {
+        var interp = INTERPRETATION.find(function (i) {
+          return avg >= i.min && avg <= i.max;
+        });
+        var color =
+          avg < 2
+            ? "var(--color-red)"
+            : avg < 4
+              ? "var(--color-yellow)"
+              : "var(--color-green)";
 
-  // Warnings
-  if (scores[5] < 2) {
-    md += '> **WARNING: Security and Compliance is below Level 2.** Stop expanding agent usage until this domain reaches Level 2.\n\n';
-  }
-  if (scores[7] < 2) {
-    md += '> **WARNING: Governance is below Level 2.** Policy enforcement is likely absent and other domain scores may be unreliable.\n\n';
-  }
+        var html =
+          '<div class="score-value" style="color:' +
+          color +
+          '">' +
+          avg.toFixed(1) +
+          "</div>";
+        html += '<div class="score-label">Overall Maturity Score (0-5)</div>';
+        if (interp) {
+          html += '<div class="score-interpretation">';
+          html +=
+            '<div class="interpretation-title">' + interp.title + "</div>";
+          html += "<p>" + interp.text + "</p>";
+          html +=
+            '<p style="margin-top:8px;font-weight:500">' +
+            interp.action +
+            "</p>";
+          html += "</div>";
+        }
+        document.getElementById("overall-section").innerHTML = html;
+      }
 
-  // Gaps
-  var gaps = [];
-  for (var i = 0; i < 9; i++) {
-    if (avg - scores[i] >= 2) {
-      gaps.push('- ' + DOMAINS[i].name + ' (Level ' + scores[i] + ', ' + (avg - scores[i]).toFixed(1) + ' below average)');
-    }
-  }
-  if (gaps.length > 0) {
-    md += '### Critical Gaps (2+ levels below average)\n\n' + gaps.join('\n') + '\n\n';
-  }
+      function renderWarnings(avg) {
+        var container = document.getElementById("warnings-container");
+        var html = "";
 
-  // Scores
-  md += '## Score Breakdown\n\n';
-  md += '| Domain | Score | Level |\n';
-  md += '|--------|-------|-------|\n';
-  for (var i = 0; i < 9; i++) {
-    md += '| ' + DOMAINS[i].name + ' | ' + scores[i] + ' | ' + LEVEL_NAMES[scores[i]] + ' |\n';
-  }
-  md += '\n';
+        // Security warning
+        if (scores[5] < 2) {
+          html +=
+            '<div class="callout callout-red"><strong>Security and Compliance is below Level 2</strong>Stop expanding agent usage until Security and Compliance reaches Level 2. Without basic policies, data classification, and secrets scanning, agent usage poses unmanaged risk.</div>';
+        }
 
-  // Radar chart description
-  md += '## Capability Profile\n\n';
-  var maxScore = Math.max.apply(null, scores);
-  var minScore = Math.min.apply(null, scores);
-  var strongest = [];
-  var weakest = [];
-  for (var i = 0; i < 9; i++) {
-    if (scores[i] === maxScore) strongest.push(DOMAINS[i].name);
-    if (scores[i] === minScore) weakest.push(DOMAINS[i].name);
-  }
-  md += '- **Strongest areas** (Level ' + maxScore + '): ' + strongest.join(', ') + '\n';
-  md += '- **Weakest areas** (Level ' + minScore + '): ' + weakest.join(', ') + '\n';
-  md += '- **Spread**: ' + (maxScore - minScore) + ' levels between highest and lowest\n\n';
+        // Governance warning
+        if (scores[7] < 2) {
+          html +=
+            '<div class="callout callout-red"><strong>Governance is below Level 2</strong>Policy enforcement is likely absent. Other domain scores may be unreliable without a governance body and approved tools list.</div>';
+        }
 
-  // 90-day plan
-  md += '## 90-Day Improvement Plan\n\n';
-  var indexed = scores.map(function(s, i) { return { idx: i, score: s }; });
-  indexed.sort(function(a, b) { return a.score - b.score; });
+        // Critical gaps
+        var gaps = [];
+        for (var i = 0; i < 9; i++) {
+          if (avg - scores[i] >= 2) {
+            gaps.push(
+              DOMAINS[i].name +
+                " (Level " +
+                scores[i] +
+                ", " +
+                (avg - scores[i]).toFixed(1) +
+                " below average)",
+            );
+          }
+        }
+        if (gaps.length > 0) {
+          html +=
+            '<div class="callout callout-yellow"><strong>Critical gaps detected (2+ levels below average)</strong>' +
+            gaps.join("<br>") +
+            "</div>";
+        }
 
-  var priorities = [];
-  if (scores[5] < 2) {
-    priorities.push({ idx: 5, score: scores[5] });
-    indexed = indexed.filter(function(x) { return x.idx !== 5; });
-  }
-  if (scores[7] < 2) {
-    priorities.push({ idx: 7, score: scores[7] });
-    indexed = indexed.filter(function(x) { return x.idx !== 7; });
-  }
-  for (var i = 0; i < indexed.length && priorities.length < 3; i++) {
-    if (indexed[i].score < 5) priorities.push(indexed[i]);
-  }
+        // All good
+        if (!html) {
+          var minScore = Math.min.apply(null, scores);
+          if (minScore >= 3) {
+            html =
+              '<div class="callout callout-green"><strong>No critical gaps detected</strong>All domains are at Level 3 or above. Focus on optimization and continuous improvement.</div>';
+          }
+        }
 
-  if (priorities.length === 0) {
-    md += 'All domains at Level 5. Focus on maintaining practices and sharing learnings.\n\n';
-  } else {
-    md += '### Priorities\n\n';
-    for (var p = 0; p < priorities.length; p++) {
-      var pr = priorities[p];
-      var target = Math.min(pr.score + 1, 5);
-      md += (p + 1) + '. **' + DOMAINS[pr.idx].name + '** -- Level ' + pr.score + ' to Level ' + target + '\n';
-    }
-    md += '\n';
+        container.innerHTML = html;
+      }
 
-    var phaseNames = [
-      { key: 'governance', label: 'Weeks 1-2: Governance and Policy' },
-      { key: 'tooling', label: 'Weeks 2-4: Tooling and Infrastructure' },
-      { key: 'standards', label: 'Weeks 3-5: Standards and Context' },
-      { key: 'pilot', label: 'Weeks 4-6: Pilot Launch' },
-      { key: 'observe', label: 'Weeks 6-10: Observation and Measurement' },
-      { key: 'evaluate', label: 'Weeks 10-13: Evaluation and Next Steps' }
-    ];
+      function renderScoreTable() {
+        var html =
+          '<thead><tr><th>Domain</th><th>Level</th><th class="score-cell">Score</th></tr></thead><tbody>';
+        for (var i = 0; i < 9; i++) {
+          var d = DOMAINS[i];
+          var s = scores[i];
+          var color =
+            s < 2
+              ? "var(--color-red)"
+              : s < 4
+                ? "var(--color-yellow)"
+                : "var(--color-green)";
+          html += "<tr>";
+          html +=
+            '<td><span class="score-dot" style="background:' +
+            d.color +
+            '"></span>' +
+            d.name +
+            "</td>";
+          html += '<td class="level-name-cell">' + LEVEL_NAMES[s] + "</td>";
+          html +=
+            '<td class="score-cell" style="color:' + color + '">' + s + "</td>";
+          html += "</tr>";
+        }
+        html += "</tbody>";
+        document.getElementById("score-table").innerHTML = html;
+      }
 
-    for (var ph = 0; ph < phaseNames.length; ph++) {
-      var phase = phaseNames[ph];
-      var actions = [];
-      for (var p = 0; p < priorities.length; p++) {
-        var pr = priorities[p];
-        var target = Math.min(pr.score + 1, 5);
-        var roadmap = ROADMAP[pr.idx];
-        if (roadmap && roadmap[target] && roadmap[target][phase.key]) {
-          var items = roadmap[target][phase.key];
-          for (var a = 0; a < items.length; a++) {
-            actions.push({ domain: DOMAINS[pr.idx].name, action: items[a] });
+      // ============================================================
+      // RADAR CHART (hand-drawn Canvas)
+      // ============================================================
+
+      function drawRadarChart() {
+        var canvas = document.getElementById("radar-canvas");
+        var dpr = window.devicePixelRatio || 1;
+        var size = 560;
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        canvas.style.width = size + "px";
+        canvas.style.height = size + "px";
+        var ctx = canvas.getContext("2d");
+        ctx.scale(dpr, dpr);
+
+        var cx = size / 2;
+        var cy = size / 2;
+        var maxR = 200;
+        var n = 9;
+        var angleStep = (2 * Math.PI) / n;
+        var startAngle = -Math.PI / 2; // top
+
+        // Grid
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1;
+        for (var level = 1; level <= 5; level++) {
+          var r = (level / 5) * maxR;
+          ctx.beginPath();
+          for (var i = 0; i <= n; i++) {
+            var angle = startAngle + i * angleStep;
+            var x = cx + r * Math.cos(angle);
+            var y = cy + r * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+
+        // Spokes
+        ctx.strokeStyle = "#d1d5db";
+        ctx.lineWidth = 1;
+        for (var i = 0; i < n; i++) {
+          var angle = startAngle + i * angleStep;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle));
+          ctx.stroke();
+        }
+
+        // Level labels on first axis
+        ctx.fillStyle = "#9ca3af";
+        ctx.font = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.textAlign = "center";
+        for (var level = 1; level <= 5; level++) {
+          var r = (level / 5) * maxR;
+          var x = cx + r * Math.cos(startAngle) - 14;
+          var y = cy + r * Math.sin(startAngle) + 4;
+          ctx.fillText(level.toString(), x, y);
+        }
+
+        // Data polygon
+        ctx.beginPath();
+        for (var i = 0; i < n; i++) {
+          var angle = startAngle + i * angleStep;
+          var r = (scores[i] / 5) * maxR;
+          var x = cx + r * Math.cos(angle);
+          var y = cy + r * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "rgba(37, 99, 235, 0.15)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(37, 99, 235, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Data points
+        for (var i = 0; i < n; i++) {
+          var angle = startAngle + i * angleStep;
+          var r = (scores[i] / 5) * maxR;
+          var x = cx + r * Math.cos(angle);
+          var y = cy + r * Math.sin(angle);
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = "#2563eb";
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Axis labels
+        ctx.fillStyle = "#374151";
+        ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
+        var labelPadding = 28;
+        for (var i = 0; i < n; i++) {
+          var angle = startAngle + i * angleStep;
+          var lx = cx + (maxR + labelPadding) * Math.cos(angle);
+          var ly = cy + (maxR + labelPadding) * Math.sin(angle);
+
+          // Adjust alignment based on position
+          var cosA = Math.cos(angle);
+          var sinA = Math.sin(angle);
+          if (cosA > 0.3) ctx.textAlign = "left";
+          else if (cosA < -0.3) ctx.textAlign = "right";
+          else ctx.textAlign = "center";
+
+          if (sinA < -0.3) ly += 0;
+          else if (sinA > 0.3) ly += 10;
+          else ly += 4;
+
+          // Wrap long labels
+          var label = DOMAINS[i].name;
+          var words = label.split(" ");
+          if (words.length > 2) {
+            var mid = Math.ceil(words.length / 2);
+            var line1 = words.slice(0, mid).join(" ");
+            var line2 = words.slice(mid).join(" ");
+            ctx.fillText(line1, lx, ly - 7);
+            ctx.fillText(line2, lx, ly + 7);
+          } else {
+            ctx.fillText(label, lx, ly);
           }
         }
       }
-      if (actions.length > 0) {
-        md += '### ' + phase.label + '\n\n';
-        md += '| Domain | Action | Done |\n';
-        md += '|--------|--------|------|\n';
-        for (var a = 0; a < actions.length; a++) {
-          md += '| ' + actions[a].domain + ' | ' + actions[a].action + ' | [ ] |\n';
+
+      // ============================================================
+      // 90-DAY PLAN GENERATION
+      // ============================================================
+
+      function renderPlan(avg) {
+        // 1. Sort domains by score ascending
+        var indexed = scores.map(function (s, i) {
+          return { idx: i, score: s };
+        });
+        indexed.sort(function (a, b) {
+          return a.score - b.score;
+        });
+
+        // 2. Force Security (idx 5) to top if < 2
+        // 3. Force Governance (idx 7) to second if < 2
+        var priorities = [];
+        var secIdx = -1,
+          govIdx = -1;
+        for (var i = 0; i < indexed.length; i++) {
+          if (indexed[i].idx === 5) secIdx = i;
+          if (indexed[i].idx === 7) govIdx = i;
         }
-        md += '\n';
+
+        if (scores[5] < 2) {
+          priorities.push({ idx: 5, score: scores[5] });
+          indexed = indexed.filter(function (x) {
+            return x.idx !== 5;
+          });
+        }
+        if (scores[7] < 2) {
+          priorities.push({ idx: 7, score: scores[7] });
+          indexed = indexed.filter(function (x) {
+            return x.idx !== 7;
+          });
+        }
+
+        // Fill remaining priorities from lowest scores
+        for (var i = 0; i < indexed.length && priorities.length < 3; i++) {
+          if (indexed[i].score < 5) {
+            priorities.push(indexed[i]);
+          }
+        }
+
+        if (priorities.length === 0) {
+          document.getElementById("plan-content").innerHTML =
+            '<div class="callout callout-green"><strong>All domains at Level 5</strong>Your organization has achieved the highest maturity level across all domains. Focus on maintaining practices and sharing learnings.</div>';
+          return;
+        }
+
+        var phaseNames = [
+          {
+            key: "governance",
+            label: "Weeks 1-2: Governance and Policy",
+            weeks: "1-2",
+          },
+          {
+            key: "tooling",
+            label: "Weeks 2-4: Tooling and Infrastructure",
+            weeks: "2-4",
+          },
+          {
+            key: "standards",
+            label: "Weeks 3-5: Standards and Context",
+            weeks: "3-5",
+          },
+          { key: "pilot", label: "Weeks 4-6: Pilot Launch", weeks: "4-6" },
+          {
+            key: "observe",
+            label: "Weeks 6-10: Observation and Measurement",
+            weeks: "6-10",
+          },
+          {
+            key: "evaluate",
+            label: "Weeks 10-13: Evaluation and Next Steps",
+            weeks: "10-13",
+          },
+        ];
+
+        var html = "";
+
+        // Priority summary
+        html += '<div style="margin-bottom:20px">';
+        for (var p = 0; p < priorities.length; p++) {
+          var pr = priorities[p];
+          var target = Math.min(pr.score + 1, 5);
+          html +=
+            '<span class="priority-badge priority-' +
+            (p + 1) +
+            '">P' +
+            (p + 1) +
+            "</span>";
+          html +=
+            "<strong>" +
+            DOMAINS[pr.idx].name +
+            "</strong> -- Level " +
+            pr.score +
+            " (" +
+            LEVEL_NAMES[pr.score] +
+            ") to Level " +
+            target +
+            " (" +
+            LEVEL_NAMES[target] +
+            ")";
+          html += '<br style="margin-bottom:6px">';
+        }
+        html += "</div>";
+
+        // Build phases
+        for (var ph = 0; ph < phaseNames.length; ph++) {
+          var phase = phaseNames[ph];
+          var actions = [];
+
+          for (var p = 0; p < priorities.length; p++) {
+            var pr = priorities[p];
+            var target = Math.min(pr.score + 1, 5);
+            var roadmap = ROADMAP[pr.idx];
+            if (roadmap && roadmap[target] && roadmap[target][phase.key]) {
+              var items = roadmap[target][phase.key];
+              for (var a = 0; a < items.length; a++) {
+                actions.push({
+                  priority: p + 1,
+                  domain: DOMAINS[pr.idx].name,
+                  action: items[a],
+                });
+              }
+            }
+          }
+
+          if (actions.length === 0) continue;
+
+          html += '<div class="plan-phase">';
+          html += "<h3>" + phase.label + "</h3>";
+          html +=
+            '<table class="plan-table"><thead><tr><th style="width:36px"></th><th>Domain</th><th>Action</th></tr></thead><tbody>';
+          for (var a = 0; a < actions.length; a++) {
+            var act = actions[a];
+            html += "<tr>";
+            html +=
+              '<td><span class="priority-badge priority-' +
+              act.priority +
+              '">P' +
+              act.priority +
+              "</span></td>";
+            html += "<td>" + act.domain + "</td>";
+            html += "<td>" + act.action + "</td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table></div>";
+        }
+
+        document.getElementById("plan-content").innerHTML = html;
       }
-    }
-  }
 
-  return md;
-}
+      // ============================================================
+      // TABS
+      // ============================================================
 
-function exportMarkdown() {
-  var md = generateMarkdownContent();
-  var blob = new Blob([md], { type: 'text/markdown' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'cmm-assessment-' + new Date().toISOString().slice(0, 10) + '.md';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Markdown file downloaded.');
-}
+      function initTabs() {
+        document.querySelectorAll(".tab-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll(".tab-btn").forEach(function (b) {
+              b.classList.remove("active");
+            });
+            document.querySelectorAll(".tab-panel").forEach(function (p) {
+              p.classList.remove("active");
+            });
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+          });
+        });
+      }
 
-function copyToClipboard() {
-  var md = generateMarkdownContent();
-  navigator.clipboard.writeText(md).then(function() {
-    showToast('Copied to clipboard.');
-  }).catch(function() {
-    // Fallback
-    var ta = document.createElement('textarea');
-    ta.value = md;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('Copied to clipboard.');
-  });
-}
+      // ============================================================
+      // EXPORT
+      // ============================================================
 
-// ============================================================
-// TOAST
-// ============================================================
+      function generateMarkdownContent() {
+        var avg =
+          scores.reduce(function (a, b) {
+            return a + b;
+          }, 0) / 9;
+        avg = Math.round(avg * 10) / 10;
+        var interp = INTERPRETATION.find(function (i) {
+          return avg >= i.min && avg <= i.max;
+        });
 
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2500);
-}
-</script>
-</body>
+        var md = "# AI Agent CMM Assessment Results\n\n";
+        md += "Generated: " + new Date().toLocaleDateString() + "\n\n";
+
+        md += "## Overall Score: " + avg.toFixed(1) + " / 5.0\n\n";
+        if (interp) {
+          md += "**" + interp.title + "**: " + interp.text + "\n\n";
+          md += "**Recommended action**: " + interp.action + "\n\n";
+        }
+
+        // Warnings
+        if (scores[5] < 2) {
+          md +=
+            "> **WARNING: Security and Compliance is below Level 2.** Stop expanding agent usage until this domain reaches Level 2.\n\n";
+        }
+        if (scores[7] < 2) {
+          md +=
+            "> **WARNING: Governance is below Level 2.** Policy enforcement is likely absent and other domain scores may be unreliable.\n\n";
+        }
+
+        // Gaps
+        var gaps = [];
+        for (var i = 0; i < 9; i++) {
+          if (avg - scores[i] >= 2) {
+            gaps.push(
+              "- " +
+                DOMAINS[i].name +
+                " (Level " +
+                scores[i] +
+                ", " +
+                (avg - scores[i]).toFixed(1) +
+                " below average)",
+            );
+          }
+        }
+        if (gaps.length > 0) {
+          md +=
+            "### Critical Gaps (2+ levels below average)\n\n" +
+            gaps.join("\n") +
+            "\n\n";
+        }
+
+        // Scores
+        md += "## Score Breakdown\n\n";
+        md += "| Domain | Score | Level |\n";
+        md += "|--------|-------|-------|\n";
+        for (var i = 0; i < 9; i++) {
+          md +=
+            "| " +
+            DOMAINS[i].name +
+            " | " +
+            scores[i] +
+            " | " +
+            LEVEL_NAMES[scores[i]] +
+            " |\n";
+        }
+        md += "\n";
+
+        // Radar chart description
+        md += "## Capability Profile\n\n";
+        var maxScore = Math.max.apply(null, scores);
+        var minScore = Math.min.apply(null, scores);
+        var strongest = [];
+        var weakest = [];
+        for (var i = 0; i < 9; i++) {
+          if (scores[i] === maxScore) strongest.push(DOMAINS[i].name);
+          if (scores[i] === minScore) weakest.push(DOMAINS[i].name);
+        }
+        md +=
+          "- **Strongest areas** (Level " +
+          maxScore +
+          "): " +
+          strongest.join(", ") +
+          "\n";
+        md +=
+          "- **Weakest areas** (Level " +
+          minScore +
+          "): " +
+          weakest.join(", ") +
+          "\n";
+        md +=
+          "- **Spread**: " +
+          (maxScore - minScore) +
+          " levels between highest and lowest\n\n";
+
+        // 90-day plan
+        md += "## 90-Day Improvement Plan\n\n";
+        var indexed = scores.map(function (s, i) {
+          return { idx: i, score: s };
+        });
+        indexed.sort(function (a, b) {
+          return a.score - b.score;
+        });
+
+        var priorities = [];
+        if (scores[5] < 2) {
+          priorities.push({ idx: 5, score: scores[5] });
+          indexed = indexed.filter(function (x) {
+            return x.idx !== 5;
+          });
+        }
+        if (scores[7] < 2) {
+          priorities.push({ idx: 7, score: scores[7] });
+          indexed = indexed.filter(function (x) {
+            return x.idx !== 7;
+          });
+        }
+        for (var i = 0; i < indexed.length && priorities.length < 3; i++) {
+          if (indexed[i].score < 5) priorities.push(indexed[i]);
+        }
+
+        if (priorities.length === 0) {
+          md +=
+            "All domains at Level 5. Focus on maintaining practices and sharing learnings.\n\n";
+        } else {
+          md += "### Priorities\n\n";
+          for (var p = 0; p < priorities.length; p++) {
+            var pr = priorities[p];
+            var target = Math.min(pr.score + 1, 5);
+            md +=
+              p +
+              1 +
+              ". **" +
+              DOMAINS[pr.idx].name +
+              "** -- Level " +
+              pr.score +
+              " to Level " +
+              target +
+              "\n";
+          }
+          md += "\n";
+
+          var phaseNames = [
+            { key: "governance", label: "Weeks 1-2: Governance and Policy" },
+            { key: "tooling", label: "Weeks 2-4: Tooling and Infrastructure" },
+            { key: "standards", label: "Weeks 3-5: Standards and Context" },
+            { key: "pilot", label: "Weeks 4-6: Pilot Launch" },
+            {
+              key: "observe",
+              label: "Weeks 6-10: Observation and Measurement",
+            },
+            {
+              key: "evaluate",
+              label: "Weeks 10-13: Evaluation and Next Steps",
+            },
+          ];
+
+          for (var ph = 0; ph < phaseNames.length; ph++) {
+            var phase = phaseNames[ph];
+            var actions = [];
+            for (var p = 0; p < priorities.length; p++) {
+              var pr = priorities[p];
+              var target = Math.min(pr.score + 1, 5);
+              var roadmap = ROADMAP[pr.idx];
+              if (roadmap && roadmap[target] && roadmap[target][phase.key]) {
+                var items = roadmap[target][phase.key];
+                for (var a = 0; a < items.length; a++) {
+                  actions.push({
+                    domain: DOMAINS[pr.idx].name,
+                    action: items[a],
+                  });
+                }
+              }
+            }
+            if (actions.length > 0) {
+              md += "### " + phase.label + "\n\n";
+              md += "| Domain | Action | Done |\n";
+              md += "|--------|--------|------|\n";
+              for (var a = 0; a < actions.length; a++) {
+                md +=
+                  "| " +
+                  actions[a].domain +
+                  " | " +
+                  actions[a].action +
+                  " | [ ] |\n";
+              }
+              md += "\n";
+            }
+          }
+        }
+
+        return md;
+      }
+
+      function exportMarkdown() {
+        var md = generateMarkdownContent();
+        var blob = new Blob([md], { type: "text/markdown" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download =
+          "cmm-assessment-" + new Date().toISOString().slice(0, 10) + ".md";
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("Markdown file downloaded.");
+      }
+
+      function copyToClipboard() {
+        var md = generateMarkdownContent();
+        navigator.clipboard
+          .writeText(md)
+          .then(function () {
+            showToast("Copied to clipboard.");
+          })
+          .catch(function () {
+            // Fallback
+            var ta = document.createElement("textarea");
+            ta.value = md;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            showToast("Copied to clipboard.");
+          });
+      }
+
+      // ============================================================
+      // TOAST
+      // ============================================================
+
+      function showToast(msg) {
+        var t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(function () {
+          t.classList.remove("show");
+        }, 2500);
+      }
+    </script>
+  </body>
 </html>
